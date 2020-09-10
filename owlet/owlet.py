@@ -1,12 +1,13 @@
 import rdflib
 from SPARQLWrapper import SPARQLWrapper, JSON
 import urllib
-
+import os
+import posixpath
 
 class Ontology():
 
-    endpoint = SPARQLWrapper('http://sparql.hegroup.org/sparql/')
-    # endpoint = SPARQLWrapper('https://ebi.identifiers.org/services/sparql')
+    #endpoint = SPARQLWrapper('http://sparql.hegroup.org/sparql/')
+    endpoint = SPARQLWrapper('https://ebi.identifiers.org/services/sparql')
     endpoint.setReturnFormat(JSON)
 
     def __init__(self, path, ontology_uri):
@@ -121,5 +122,7 @@ class Ontology():
             return self.__getattribute__('get_uri_by_term')(name)
 
 
-SO = Ontology('ontologies/so.owl', 'http://purl.obolibrary.org/obo/so.owl')
-SBO = Ontology('ontologies/SBO_OWL.owl', 'http://biomodels.net/SBO/')
+SO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
+              'ontologies/so.owl'), 'http://purl.obolibrary.org/obo/so.owl')
+SBO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
+               'ontologies/SBO_OWL.owl'), 'http://biomodels.net/SBO/')

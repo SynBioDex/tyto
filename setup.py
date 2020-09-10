@@ -1,8 +1,8 @@
 from setuptools import setup
 
-setup(name='Owlet',
+setup(name='owlet',
       version='0.1',
-      description='Python implementation of SBOL 3 standard',
+      description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
       url='https://github.com/SynBioDex/Owlet',
       author='Bryan Bartley',
@@ -27,7 +27,10 @@ setup(name='Owlet',
             'Programming Language :: Python :: 3'
       ],
       # What does your project relate to?
-      keywords='synthetic biology',
+      keywords='ontologies',
+      packages=['owlet'],
+      package_data={'owlet': ['ontologies/*.owl']},
+      include_package_data=True,
       install_requires=[
             'rdflib>=5.0',
             'SPARQLWrapper'
