@@ -6,14 +6,12 @@ import posixpath
 
 class Ontology():
 
-    #endpoint = SPARQLWrapper('http://sparql.hegroup.org/sparql/')
-    endpoint = SPARQLWrapper('https://ebi.identifiers.org/services/sparql')
-    endpoint.setReturnFormat(JSON)
-
     def __init__(self, path, ontology_uri):
         self.path = path
         self.graph = rdflib.Graph()
         self.uri = ontology_uri
+        self.endpoint = SPARQLWrapper('http://sparql.hegroup.org/sparql/')
+        self.endpoint.setReturnFormat(JSON)
 
     def _query(self, sparql, error_msg):
         '''
@@ -22,6 +20,7 @@ class Ontology():
         local graph takes a while and uses up memory.  However, once a graph is loaded
         locally, subsequent queries will be performed directly on the graph.
         '''
+        response = []
         if len(self.graph):
             # If the ontology graph has been loaded locally, query that rather
             # than querying over the network
@@ -30,11 +29,13 @@ class Ontology():
         else:
             try:
                 # If no ontology graph is located, query the network endpoint
-                Ontology.endpoint.setQuery(sparql)
-                response = Ontology.endpoint.query()
+                raise Exception()
+                self.endpoint.setQuery(sparql)
+                response = self.endpoint.query()
                 response = Ontology._convert_ontobee_response(response)
-            except urllib.error.URLError:
+            except Exception as e:
                 # If the connection fails, load the ontology locally
+                print(e)
                 self.graph.parse(self.path)
                 response = self.graph.query(sparql)
                 response = Ontology._convert_rdflib_response(response)
@@ -89,19 +90,27 @@ class Ontology():
         # UNION in the query. Additionally, terms in SBO have spaces rather
         # than underscores. This creates a problem when looking up terms by
         # an attribute, e.g., SBO.systems_biology_representation
+
+        sanitized_term=term.replace('_', ' ')
         query = '''
             SELECT distinct ?uri
             WHERE
             {{
-                ?uri rdf:type owl:Class .
-                {{?uri rdfs:label "{term}"^^xsd:string}} UNION
-                {{?uri rdfs:label "{term}"}} UNION
-                {{?uri rdfs:label "{sanitized_term}"}}
+                {{?uri rdfs:label "{sanitized_term}"}} UNION
+                {{?uri rdfs:label "{sanitized_term}"^^xsd:string}} UNION
+                {{?uri rdfs:label "{sanitized_term}"@en}} UNION
+                {{?uri rdfs:label "{sanitized_term}"@nl}}
             }}
             '''.format(term=term, sanitized_term=term.replace('_', ' '))
+
         error_msg = '{} not a valid ontology term'.format(term)
-        response = self._query(query, error_msg)
-        return response[0]
+        response = self._query(query, error_msg)[0]
+        return self._to_user(response)
+
+    def _to_user(self, uri):
+        # Some Ontology instances may override this method to translate a URI
+        # from purl to identifiers.org namespaces
+        return uri
 
     def get_ontology(self):
         query = '''
@@ -124,5 +133,25 @@ class Ontology():
 
 SO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
               'ontologies/so.owl'), 'http://purl.obolibrary.org/obo/so.owl')
+SO._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/SO_',
+                                      'https://identifiers.org/SO:')
+
 SBO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
                'ontologies/SBO_OWL.owl'), 'http://biomodels.net/SBO/')
+SBO._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
+                                      'https://identifiers.org/SBO:')
+
+NCIT = Ontology(None, 'http://purl.obolibrary.org/obo/NCIT_C43816')
+
+OM = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
+               'ontologies/om-2.0.rdf'),'')
+OM._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
+                                      'https://identifiers.org/SBO:')
+
+
+'''
+'http://purl.obolibrary.org/obo/SO_0000167'
+'http://biomodels.net/SBO/SBO_0000241'
+'http://purl.obolibrary.org/obo/NCIT_C20865'
+'''
+
