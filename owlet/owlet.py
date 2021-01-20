@@ -6,12 +6,16 @@ import posixpath
 
 class Ontology():
 
-    def __init__(self, path, ontology_uri):
+    def __init__(self, path=None, endpoint=None, uri=None):
+        if not path and not endpoint:
+            raise Exception('A sparql endpoint or a local path to an ontology must be specified')
         self.path = path
         self.graph = rdflib.Graph()
-        self.uri = ontology_uri
-        self.endpoint = SPARQLWrapper('http://sparql.hegroup.org/sparql/')
-        self.endpoint.setReturnFormat(JSON)
+        self.uri = uri
+        self.endpoint = None
+        if endpoint:
+            self.endpoint = SPARQLWrapper(endpoint)
+            self.endpoint.setReturnFormat(JSON)
 
     def _query(self, sparql, error_msg):
         '''
@@ -24,21 +28,50 @@ class Ontology():
         if len(self.graph):
             # If the ontology graph has been loaded locally, query that rather
             # than querying over the network
+            sparql = sparql.format(from_clause='')  # Because only one ontology per file, delete the from clause
             response = self.graph.query(sparql)
             response = Ontology._convert_rdflib_response(response)
-        else:
+
+        if self.endpoint:
+            # print('Testing endpoint')
             try:
                 # If no ontology graph is located, query the network endpoint
-                raise Exception()
+                # The general naming pattern for an Ontobee graph URI is to transform a PURL 
+                # http://purl.obolibrary.org/obo/$foo.owl (note foo must be all lowercase 
+                # by OBO conventions) to http://purl.obolibrary.org/obo/merged/uppercase($foo).
+                from_clause = ''
+                if self.uri:
+                    ontology = self.uri
+                    if 'http://purl.obolibrary.org/obo/' in self.uri:
+                        ontology = ontology.replace('http://purl.obolibrary.org/obo/', '')
+                        ontology = ontology.replace('.owl', '')
+                        ontology = ontology.upper()
+                        ontology = 'http://purl.obolibrary.org/obo/merged/' + ontology
+                    from_clause = f'FROM <{ontology}>'
+                sparql = sparql.format(from_clause=from_clause)
                 self.endpoint.setQuery(sparql)
                 response = self.endpoint.query()
                 response = Ontology._convert_ontobee_response(response)
             except Exception as e:
-                # If the connection fails, load the ontology locally
                 print(e)
+        else:
+            #print('No endpoint specified. Querying local cache.')
+            pass
+
+        # If the connection fails or nothing found, load the ontology locally
+        if not len(response) and self.path:
+            #print('Testing local cache')
+            try:
                 self.graph.parse(self.path)
+                sparql = sparql.format(from_clause='')  # Because only one ontology per file, delete the from clause
                 response = self.graph.query(sparql)
                 response = Ontology._convert_rdflib_response(response)
+            except Exception as e:
+                print(e)
+        else:
+            #print('No path to local cache specified.')
+            pass
+
         if not len(response):
             raise LookupError(error_msg)
         return response
@@ -48,8 +81,8 @@ class Ontology():
         Ontobee SPARQL interface returns JSON. This extracts and flattens the queried
         variables into a list
         '''
+        converted_response = []
         response = response.convert()  # Convert http response to JSON
-        converted_response = []  # Next, flatten and convert to list
         for var, binding in zip(response['head']['vars'],
                                 response['results']['bindings']):
             converted_response.append(binding[var]['value'])
@@ -70,10 +103,9 @@ class Ontology():
         query = '''
             SELECT distinct ?label
             WHERE
-            {{
-                <{uri}> rdf:type owl:Class .
+            {{{{
                 <{uri}> rdfs:label ?label .
-            }}
+            }}}}
             '''.format(uri=uri)
         error_msg = '{} not found'.format(uri)
         response = self._query(query, error_msg)
@@ -92,17 +124,18 @@ class Ontology():
         # an attribute, e.g., SBO.systems_biology_representation
 
         sanitized_term=term.replace('_', ' ')
+
         query = '''
             SELECT distinct ?uri
+            {{from_clause}}
             WHERE
-            {{
-                {{?uri rdfs:label "{sanitized_term}"}} UNION
-                {{?uri rdfs:label "{sanitized_term}"^^xsd:string}} UNION
-                {{?uri rdfs:label "{sanitized_term}"@en}} UNION
-                {{?uri rdfs:label "{sanitized_term}"@nl}}
-            }}
-            '''.format(term=term, sanitized_term=term.replace('_', ' '))
-
+            {{{{
+                {{{{?uri rdfs:label "{sanitized_term}"}}}} UNION
+                {{{{?uri rdfs:label "{sanitized_term}"^^xsd:string}}}} UNION
+                {{{{?uri rdfs:label "{sanitized_term}"@en}}}} UNION
+                {{{{?uri rdfs:label "{sanitized_term}"@nl}}}}
+            }}}}
+            '''.format(sanitized_term=term.replace('_', ' '))
         error_msg = '{} not a valid ontology term'.format(term)
         response = self._query(query, error_msg)[0]
         return self._to_user(response)
@@ -131,23 +164,30 @@ class Ontology():
             return self.__getattribute__('get_uri_by_term')(name)
 
 
-SO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
-              'ontologies/so.owl'), 'http://purl.obolibrary.org/obo/so.owl')
+def installation_path(relative_path):
+    return posixpath.join(os.path.dirname(os.path.realpath(__file__)),
+                          relative_path)
+
+SO = Ontology(path=installation_path('ontologies/so.owl'),
+              endpoint='http://sparql.hegroup.org/sparql/',
+              uri='http://purl.obolibrary.org/obo/so.owl')
+
 SO._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/SO_',
                                       'https://identifiers.org/SO:')
 
-SBO = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
-               'ontologies/SBO_OWL.owl'), 'http://biomodels.net/SBO/')
+SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
+               endpoint='http://sparql.hegroup.org/sparql/',
+               uri='http://biomodels.net/SBO/')
+
 SBO._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
                                       'https://identifiers.org/SBO:')
 
-NCIT = Ontology(None, 'http://purl.obolibrary.org/obo/NCIT_C43816')
+NCIT = Ontology(path=None,
+                endpoint='http://sparql.hegroup.org/sparql/',
+                uri='http://purl.obolibrary.org/obo/ncit.owl')
 
-OM = Ontology(posixpath.join(os.path.dirname(os.path.realpath(__file__)),
-               'ontologies/om-2.0.rdf'),'')
-OM._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
-                                      'https://identifiers.org/SBO:')
-
+OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
+              endpoint=None)
 
 '''
 'http://purl.obolibrary.org/obo/SO_0000167'
