@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='owlet',
+setup(name='Owlet',
       version='1.0a',
       description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
@@ -28,8 +28,8 @@ setup(name='owlet',
       ],
       # What does your project relate to?
       keywords='ontologies',
-      packages=['owlet'],
-      package_data={'owlet': ['ontologies/*.owl',
+      packages=['Owlet'],
+      package_data={'Owlet': ['ontologies/*.owl',
                               'ontologies/*.rdf',
                               'ontologies/*.ttl']},
       include_package_data=True,
