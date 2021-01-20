@@ -48,23 +48,24 @@ class Ontology():
                         ontology = ontology.upper()
                         ontology = 'http://purl.obolibrary.org/obo/merged/' + ontology
                     from_clause = f'FROM <{ontology}>'
-                sparql = sparql.format(from_clause=from_clause)
-                self.endpoint.setQuery(sparql)
+                sparql_final = sparql.format(from_clause=from_clause)
+                self.endpoint.setQuery(sparql_final)
                 response = self.endpoint.query()
                 response = Ontology._convert_ontobee_response(response)
             except Exception as e:
                 print(e)
+
         else:
             #print('No endpoint specified. Querying local cache.')
             pass
 
         # If the connection fails or nothing found, load the ontology locally
         if not len(response) and self.path:
-            #print('Testing local cache')
+            # print('Testing local cache')
             try:
                 self.graph.parse(self.path)
-                sparql = sparql.format(from_clause='')  # Because only one ontology per file, delete the from clause
-                response = self.graph.query(sparql)
+                sparql_final = sparql.format(from_clause='')  # Because only one ontology per file, delete the from clause
+                response = self.graph.query(sparql_final)
                 response = Ontology._convert_rdflib_response(response)
             except Exception as e:
                 print(e)
@@ -100,6 +101,7 @@ class Ontology():
         :param uri: The URI for the term
         :return: str
         '''
+        uri = self._from_user(uri)
         query = '''
             SELECT distinct ?label
             WHERE
@@ -145,6 +147,11 @@ class Ontology():
         # from purl to identifiers.org namespaces
         return uri
 
+    def _from_user(self, uri):
+        # Some Ontology instances may override this method to translate a URI
+        # from purl to identifiers.org namespaces
+        return uri
+
     def get_ontology(self):
         query = '''
             SELECT distinct ?ontology_uri
@@ -174,13 +181,17 @@ SO = Ontology(path=installation_path('ontologies/so.owl'),
 
 SO._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/SO_',
                                       'https://identifiers.org/SO:')
+SO._from_user = lambda uri: uri.replace('https://identifiers.org/SO:',
+                                        'http://purl.obolibrary.org/obo/SO_')
 
 SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
                endpoint='http://sparql.hegroup.org/sparql/',
-               uri='http://biomodels.net/SBO/')
+               uri='http://purl.obolibrary.org/obo/sbo.owl')
 
 SBO._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
                                       'https://identifiers.org/SBO:')
+SBO._from_user = lambda uri: uri.replace('https://identifiers.org/SBO:',
+                                         'http://biomodels.net/SBO/SBO_')
 
 NCIT = Ontology(path=None,
                 endpoint='http://sparql.hegroup.org/sparql/',
