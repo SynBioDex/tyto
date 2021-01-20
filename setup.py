@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='owlet',
-      version='0.1',
+      version='1.0a',
       description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
       url='https://github.com/SynBioDex/Owlet',
@@ -14,7 +14,7 @@ setup(name='owlet',
             #   3 - Alpha
             #   4 - Beta
             #   5 - Production/Stable
-            'Development Status :: 2 - Pre-Alpha',
+            'Development Status :: 3 - Alpha',
 
             # Indicate who your project is intended for
             'Intended Audience :: Developers',
@@ -29,7 +29,9 @@ setup(name='owlet',
       # What does your project relate to?
       keywords='ontologies',
       packages=['owlet'],
-      package_data={'owlet': ['ontologies/*.owl']},
+      package_data={'owlet': ['ontologies/*.owl',
+                              'ontologies/*.rdf',
+                              'ontologies/*.ttl']},
       include_package_data=True,
       install_requires=[
             'rdflib>=5.0',
