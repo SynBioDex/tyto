@@ -1,10 +1,10 @@
 from setuptools import setup
 
-setup(name='Owlet',
+setup(name='tyto',
       version='1.0a',
       description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
-      url='https://github.com/SynBioDex/Owlet',
+      url='https://github.com/SynBioDex/tyto',
       author='Bryan Bartley',
       author_email='bartleyba@sbolstandard.org',
       license='Apache-2',
@@ -28,8 +28,8 @@ setup(name='Owlet',
       ],
       # What does your project relate to?
       keywords='ontologies',
-      packages=['Owlet'],
-      package_data={'Owlet': ['ontologies/*.owl',
+      packages=['tyto'],
+      package_data={'tyto': ['ontologies/*.owl',
                               'ontologies/*.rdf',
                               'ontologies/*.ttl']},
       include_package_data=True,
