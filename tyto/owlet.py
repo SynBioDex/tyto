@@ -196,6 +196,12 @@ SBO._from_user = lambda uri: uri.replace('https://identifiers.org/SBO:',
 NCIT = Ontology(path=None,
                 endpoint='http://sparql.hegroup.org/sparql/',
                 uri='http://purl.obolibrary.org/obo/ncit.owl')
+NCIT._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/NCIT_',
+                                      'https://identifiers.org/ncit:')
+NCIT._from_user = lambda uri: uri.replace('https://identifiers.org/ncit:',
+                                         'http://purl.obolibrary.org/obo/NCIT_')
+
+
 
 OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
               endpoint=None)
