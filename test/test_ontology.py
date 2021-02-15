@@ -7,7 +7,7 @@ class TestOntology(unittest.TestCase):
     def test_SO(self):
         term_a = 'sequence_feature'
         uri = SO.get_uri_by_term(term_a)
-        self.assertEqual(uri, 'http://purl.obolibrary.org/obo/SO_0000110')
+        self.assertEqual(uri, 'https://identifiers.org/SO:0000110')
         term_b = SO.get_term_by_uri(uri)
         self.assertEqual(term_a, term_b)
         with self.assertRaises(LookupError):
@@ -16,7 +16,7 @@ class TestOntology(unittest.TestCase):
         uri = SO.get_uri_by_term(term_a)
 
     def test_SBO(self):
-        uri_a = 'http://biomodels.net/SBO/SBO_0000000'
+        uri_a = 'https://identifiers.org/SBO:0000000'
         term = SBO.get_term_by_uri(uri_a)
         self.assertEqual(term, 'systems biology representation')
         uri_b = SBO.get_uri_by_term(term)
