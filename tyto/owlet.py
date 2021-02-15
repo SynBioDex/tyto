@@ -183,23 +183,31 @@ def installation_path(relative_path):
     return posixpath.join(os.path.dirname(os.path.realpath(__file__)),
                           relative_path)
 
+def multi_replace(target_uri, old_namespaces, new_namespace):
+    for ns in old_namespaces:
+        if ns in target_uri:
+            return target_uri.replace(ns, new_namespace)
+    return target_uri
+
 SO = Ontology(path=installation_path('ontologies/so.owl'),
               endpoint='http://sparql.hegroup.org/sparql/',
               uri='http://purl.obolibrary.org/obo/so.owl')
-
 SO._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/SO_',
                                       'https://identifiers.org/SO:')
-SO._from_user = lambda uri: uri.replace('https://identifiers.org/SO:',
-                                        'http://purl.obolibrary.org/obo/SO_')
+SO._from_user = lambda uri: multi_replace(uri,
+                                          ['https://identifiers.org/SO:',
+                                           'http://identifiers.org/so/SO:'],
+                                           'http://purl.obolibrary.org/obo/SO_')
 
 SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
                endpoint='http://sparql.hegroup.org/sparql/',
                uri='http://purl.obolibrary.org/obo/sbo.owl')
-
 SBO._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
                                       'https://identifiers.org/SBO:')
-SBO._from_user = lambda uri: uri.replace('https://identifiers.org/SBO:',
-                                         'http://biomodels.net/SBO/SBO_')
+SBO._from_user = lambda uri: multi_replace(uri,
+                                          ['http://identifiers.org/sbo/SBO:',
+                                          'https://identifiers.org/SBO:'],
+                                          'http://biomodels.net/SBO/SBO_')
 SBO._sanitize_term = lambda term: term.replace('_', ' ')
 
 NCIT = Ontology(path=None,
@@ -207,10 +215,10 @@ NCIT = Ontology(path=None,
                 uri='http://purl.obolibrary.org/obo/ncit.owl')
 NCIT._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/NCIT_',
                                       'https://identifiers.org/ncit:')
-NCIT._from_user = lambda uri: uri.replace('https://identifiers.org/ncit:',
-                                         'http://purl.obolibrary.org/obo/NCIT_')
-
-
+NCIT._from_user = lambda uri: multi_replace(uri,
+                                           ['http://identifiers.org/ncit/ncit:',
+                                           'https://identifiers.org/ncit:'],
+                                           'http://purl.obolibrary.org/obo/NCIT_')
 
 OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
               endpoint=None)
