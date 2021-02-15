@@ -1,5 +1,5 @@
 import unittest
-from owlet import *
+from tyto import *
 
 
 class TestOntology(unittest.TestCase):

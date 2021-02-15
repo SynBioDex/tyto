@@ -120,13 +120,13 @@ class Ontology():
         :param term: The ontology term
         :return: str
         '''
+        
         # Queries to the sequence ontology require the xsd:string datatype
         # whereas queries to the systems biology ontology do not, hence the
         # UNION in the query. Additionally, terms in SBO have spaces rather
         # than underscores. This creates a problem when looking up terms by
         # an attribute, e.g., SBO.systems_biology_representation
-
-        sanitized_term=term.replace('_', ' ')
+        sanitized_term=self._sanitize_term(term)
 
         query = '''
             SELECT distinct ?uri
@@ -138,7 +138,7 @@ class Ontology():
                 {{{{?uri rdfs:label "{sanitized_term}"@en}}}} UNION
                 {{{{?uri rdfs:label "{sanitized_term}"@nl}}}}
             }}}}
-            '''.format(sanitized_term=term.replace('_', ' '))
+            '''.format(sanitized_term=sanitized_term)
 
         error_msg = '{} not a valid ontology term'.format(term)
         response = self._query(query, error_msg)[0]
@@ -153,6 +153,12 @@ class Ontology():
         # Some Ontology instances may override this method to translate a URI
         # from purl to identifiers.org namespaces
         return uri
+
+    def _sanitize_term(self, term):
+        # Some Ontology instances may override this method to perform string
+        # manipulation of an ontology terms, for example, replacing spaces
+        # or changing camel-case to snake-case
+        return term
 
     def get_ontology(self):
         query = '''
@@ -194,6 +200,7 @@ SBO._to_user = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
                                       'https://identifiers.org/SBO:')
 SBO._from_user = lambda uri: uri.replace('https://identifiers.org/SBO:',
                                          'http://biomodels.net/SBO/SBO_')
+SBO._sanitize_term = lambda term: term.replace('_', ' ')
 
 NCIT = Ontology(path=None,
                 endpoint='http://sparql.hegroup.org/sparql/',
