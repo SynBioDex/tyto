@@ -213,12 +213,15 @@ SBO._sanitize_term = lambda term: term.replace('_', ' ')
 NCIT = Ontology(path=None,
                 endpoint='http://sparql.hegroup.org/sparql/',
                 uri='http://purl.obolibrary.org/obo/ncit.owl')
+
 NCIT._to_user = lambda uri: uri.replace('http://purl.obolibrary.org/obo/NCIT_',
                                       'https://identifiers.org/ncit:')
 NCIT._from_user = lambda uri: multi_replace(uri,
                                            ['http://identifiers.org/ncit/ncit:',
                                            'https://identifiers.org/ncit:'],
                                            'http://purl.obolibrary.org/obo/NCIT_')
+NCIT._sanitize_term = lambda term: term.replace('_', ' ')
+
 
 OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
               endpoint=None)
