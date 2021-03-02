@@ -45,6 +45,8 @@ class TestOntology(unittest.TestCase):
         with self.assertRaises(LookupError):
             not_a_term = SO.not_a_term
 
+    def test_NCIT(self):
+        self.assertEqual(NCIT.Growth_Medium, 'https://identifiers.org/ncit:C85504')
 
 if __name__ == '__main__':
     unittest.main()
