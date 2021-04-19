@@ -108,11 +108,12 @@ class Ontology():
             WHERE
             {{{{
                 <{uri}> rdfs:label ?label .
+                 filter langMatches(lang(?label), "en")
             }}}}
             '''.format(uri=uri)
         error_msg = '{} not found'.format(uri)
         response = self._query(query, error_msg)
-        return response[0]
+        return self._reverse_sanitize_term(response[0])
 
     def get_uri_by_term(self, term):
         '''
@@ -127,19 +128,25 @@ class Ontology():
         # than underscores. This creates a problem when looking up terms by
         # an attribute, e.g., SBO.systems_biology_representation
         sanitized_term=self._sanitize_term(term)
-
         query = '''
             SELECT distinct ?uri
             {{from_clause}}
             WHERE
             {{{{
-                {{{{?uri rdfs:label "{sanitized_term}"}}}} UNION
-                {{{{?uri rdfs:label "{sanitized_term}"^^xsd:string}}}} UNION
-                {{{{?uri rdfs:label "{sanitized_term}"@en}}}} UNION
-                {{{{?uri rdfs:label "{sanitized_term}"@nl}}}}
+                optional 
+                {{{{
+                    ?uri rdfs:label "{sanitized_term}"@en
+                }}}}
+                optional
+                {{{{ 
+                    ?uri rdfs:label "{sanitized_term}"
+                }}}}
+                optional
+                {{{{ 
+                    ?uri rdfs:label "{sanitized_term}"^^xsd:string
+                }}}}
             }}}}
             '''.format(sanitized_term=sanitized_term)
-
         error_msg = '{} not a valid ontology term'.format(term)
         response = self._query(query, error_msg)[0]
         return self._to_user(response)
@@ -155,6 +162,12 @@ class Ontology():
         return uri
 
     def _sanitize_term(self, term):
+        # Some Ontology instances may override this method to perform string
+        # manipulation of an ontology terms, for example, replacing spaces
+        # or changing camel-case to snake-case
+        return term
+
+    def _reverse_sanitize_term(self, term):
         # Some Ontology instances may override this method to perform string
         # manipulation of an ontology terms, for example, replacing spaces
         # or changing camel-case to snake-case
@@ -225,7 +238,8 @@ NCIT._sanitize_term = lambda term: term.replace('_', ' ')
 
 OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
               endpoint=None)
-
+OM._sanitize_term = lambda term: term.replace('liter', 'litre').replace('meter', 'metre').replace('molar', 'molair')
+OM._reverse_sanitize_term = lambda term: term.replace('litre', 'liter').replace('metre', 'meter').replace('molair', 'molar')
 '''
 'http://purl.obolibrary.org/obo/SO_0000167'
 'http://biomodels.net/SBO/SBO_0000241'

@@ -48,5 +48,13 @@ class TestOntology(unittest.TestCase):
     def test_NCIT(self):
         self.assertEqual(NCIT.Growth_Medium, 'https://identifiers.org/ncit:C85504')
 
+    def test_OM(self):
+        self.assertEqual(OM.molar, OM.molair)
+        self.assertEqual(OM.liter, OM.liter)
+        self.assertEqual(OM.meter, OM.metre)
+        self.assertEqual(OM.get_term_by_uri('http://www.ontology-of-units-of-measure.org/resource/om-2/hour'),
+                         'hour')
+
+
 if __name__ == '__main__':
     unittest.main()
