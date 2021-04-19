@@ -87,7 +87,8 @@ class Ontology():
             response = response.convert()  # Convert http response to JSON
             for var, binding in zip(response['head']['vars'],
                                     response['results']['bindings']):
-                converted_response.append(binding[var]['value'])
+                if var in binding:
+                    converted_response.append(binding[var]['value'])
         return converted_response
 
     def _convert_rdflib_response(response):
@@ -107,8 +108,15 @@ class Ontology():
             SELECT distinct ?label
             WHERE
             {{{{
-                <{uri}> rdfs:label ?label .
-                 filter langMatches(lang(?label), "en")
+                optional
+                {{{{
+                    <{uri}> rdfs:label ?label .
+                     filter langMatches(lang(?label), "en")
+                }}}}
+                optional
+                {{{{
+                    <{uri}> rdfs:label ?label .
+                }}}}
             }}}}
             '''.format(uri=uri)
         error_msg = '{} not found'.format(uri)
@@ -212,6 +220,9 @@ SO._from_user = lambda uri: multi_replace(uri,
                                            'http://identifiers.org/so/SO:'],
                                            'http://purl.obolibrary.org/obo/SO_')
 
+SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
+               endpoint='http://sparql.hegroup.org/sparql/',
+               uri='http://purl.obolibrary.org/obo/sbo.owl')
 SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
                endpoint='http://sparql.hegroup.org/sparql/',
                uri='http://purl.obolibrary.org/obo/sbo.owl')
