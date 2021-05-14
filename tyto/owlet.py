@@ -1,8 +1,10 @@
-import rdflib
-from SPARQLWrapper import SPARQLWrapper, JSON
 import urllib
 import os
 import posixpath
+from functools import lru_cache
+
+import rdflib
+from SPARQLWrapper import SPARQLWrapper, JSON
 
 class Ontology():
 
@@ -97,6 +99,7 @@ class Ontology():
         '''
         return [str(row[0]) for row in response]
 
+    @lru_cache
     def get_term_by_uri(self, uri):
         '''
         Get the ontology term (e.g., "promoter") corresponding to the given URI
@@ -123,13 +126,14 @@ class Ontology():
         response = self._query(query, error_msg)
         return self._reverse_sanitize_term(response[0])
 
+    @lru_cache
     def get_uri_by_term(self, term):
         '''
         Get the URI assigned to an ontology term (e.g., "promoter")
         :param term: The ontology term
         :return: str
         '''
-        
+
         # Queries to the sequence ontology require the xsd:string datatype
         # whereas queries to the systems biology ontology do not, hence the
         # UNION in the query. Additionally, terms in SBO have spaces rather
@@ -203,6 +207,7 @@ class Ontology():
 def installation_path(relative_path):
     return posixpath.join(os.path.dirname(os.path.realpath(__file__)),
                           relative_path)
+
 
 def multi_replace(target_uri, old_namespaces, new_namespace):
     for ns in old_namespaces:
