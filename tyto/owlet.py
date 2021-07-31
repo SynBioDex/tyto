@@ -85,8 +85,8 @@ class Ontology():
         converted_response = []
         if response:
             response = response.convert()  # Convert http response to JSON
-            for var, binding in zip(response['head']['vars'],
-                                    response['results']['bindings']):
+            var = response['head']['vars'][0]
+            for binding in response['results']['bindings']:
                 if var in binding:
                     converted_response.append(binding[var]['value'])
         return converted_response
@@ -157,7 +157,7 @@ class Ontology():
             '''.format(sanitized_term=sanitized_term)
         error_msg = '{} not a valid ontology term'.format(term)
         response = self._query(query, error_msg)[0]
-        return self._to_user(response)
+        return URI(self._to_user(response), self)
 
     def _to_user(self, uri):
         # Some Ontology instances may override this method to translate a URI
@@ -184,20 +184,62 @@ class Ontology():
     def get_ontology(self):
         query = '''
             SELECT distinct ?ontology_uri
+            {{from_clause}}
             WHERE
-              {
+              {{{{
                 ?ontology_uri a owl:Ontology
-              }
+              }}}}
             '''
         error_msg = 'Graph not found'
         response = self._query(query, error_msg)
         return response[0]
+
+    def is_subclass_of(self, subclass_uri: str, superclass_uri: str):
+        superclass_uri = self._from_user(superclass_uri)
+        subclass_uri = self._from_user(subclass_uri)
+        query = '''
+            SELECT distinct ?subclass 
+            {{from_clause}}
+            WHERE 
+            {{{{
+                ?subclass rdf:type owl:Class .
+                ?subclass rdfs:subClassOf <{}>
+            }}}}
+            '''.format(superclass_uri)
+        error_msg = ''
+        subclasses = self._query(query, error_msg)
+        return subclass_uri in subclasses
 
     def __getattr__(self, name):
         if name in self.__getattribute__('__dict__'):
             return self.__getattribute__(name)
         else:
             return self.__getattribute__('get_uri_by_term')(name)
+
+
+class URI(str):
+
+    def __new__(cls, value, ontology):
+        term = str.__new__(cls, value)
+        term.ontology = ontology
+        return term
+
+
+    def is_subclass_of(self, superclass_uri: str):
+        superclass_uri = self.ontology._from_user(superclass_uri)
+        subclass_uri = self.ontology._from_user(self)
+        query = '''
+            SELECT distinct ?subclass 
+            {{from_clause}}
+            WHERE 
+            {{{{
+                ?subclass rdf:type owl:Class .
+                ?subclass rdfs:subClassOf <{}>
+            }}}}
+            '''.format(superclass_uri)
+        error_msg = ''
+        subclasses = self.ontology._query(query, error_msg)
+        return subclass_uri in subclasses
 
 
 def installation_path(relative_path):
