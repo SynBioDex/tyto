@@ -55,6 +55,10 @@ class TestOntology(unittest.TestCase):
         self.assertEqual(OM.get_term_by_uri('http://www.ontology-of-units-of-measure.org/resource/om-2/hour'),
                          'hour')
 
+    def test_subclass(self):
+        self.assertTrue(type(SO.promoter) is URI)
+        self.assertTrue(SO.inducible_promoter.is_subclass_of(SO.promoter))
+        self.assertFalse(SO.promoter.is_subclass_of(SO.inducible_promoter))
 
 if __name__ == '__main__':
     unittest.main()
