@@ -1,7 +1,12 @@
 import os
+import logging
 from functools import lru_cache
 
 from .endpoint import Ontobee, Graph, Endpoint
+
+
+LOGGER = logging.getLogger(__name__)
+logging.basicConfig(format='tyto: %(levelname)s: %(message)s')
 
 
 class Ontology():
@@ -39,19 +44,18 @@ class Ontology():
                 if response is not None:
                     return response
             except Exception as x:
-                print(x)
+                LOGGER.error(x)
 
         # Try endpoints
         if self.endpoints:
             for e in self.endpoints:
                 method = getattr(e, method_name)
-                response = method(self, *args)
                 try:
                     response = method(self, *args)
                     if response is not None:
                         return response
                 except Exception as x:
-                    print(x)
+                    LOGGER.error(x)
 
         # If the connection fails or nothing found, fall back and load the ontology locally
         if self.graph and not self.graph.is_loaded():
@@ -62,7 +66,7 @@ class Ontology():
                 if response is not None:
                     return response
             except Exception as x:
-                print(x)
+                LOGGER.error(x)
 
         if exception:
             raise exception
@@ -139,5 +143,5 @@ def configure_cache_size(maxsize=1000):
         Ontology.get_term_by_uri = lru_cache(maxsize=maxsize)(Ontology.get_term_by_uri.__wrapped__)
         Ontology.get_uri_by_term = lru_cache(maxsize=maxsize)(Ontology.get_uri_by_term.__wrapped__)
 
+# Initialize cache
 configure_cache_size()
-configure_cache_size(0)
