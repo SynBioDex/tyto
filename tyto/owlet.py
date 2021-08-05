@@ -1,7 +1,5 @@
-import rdflib
-import urllib
 import os
-import posixpath
+from functools import lru_cache
 
 from .endpoint import Ontobee, Graph, Endpoint
 
@@ -129,3 +127,17 @@ def multi_replace(target_uri, old_namespaces, new_namespace):
         if ns in target_uri:
             return target_uri.replace(ns, new_namespace)
     return target_uri
+
+
+def configure_cache_size(maxsize=1000):
+    if not '__wrapped__' in Ontology.get_term_by_uri.__dict__:
+        # Initialize cache
+        Ontology.get_term_by_uri = lru_cache(maxsize=maxsize)(Ontology.get_term_by_uri)
+        Ontology.get_uri_by_term = lru_cache(maxsize=maxsize)(Ontology.get_uri_by_term)
+    else:
+        # Reset cache-size if it was previously set
+        Ontology.get_term_by_uri = lru_cache(maxsize=maxsize)(Ontology.get_term_by_uri.__wrapped__)
+        Ontology.get_uri_by_term = lru_cache(maxsize=maxsize)(Ontology.get_uri_by_term.__wrapped__)
+
+configure_cache_size()
+configure_cache_size(0)
