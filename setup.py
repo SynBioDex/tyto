@@ -28,14 +28,15 @@ setup(name='tyto',
       ],
       # What does your project relate to?
       keywords='ontologies',
-      packages=['tyto'],
+      packages=setuptools.find_packages(),
       package_data={'tyto': ['ontologies/*.owl',
                               'ontologies/*.rdf',
                               'ontologies/*.ttl']},
       include_package_data=True,
       install_requires=[
             'rdflib>=5.0',
-            'SPARQLWrapper'
+            'SPARQLWrapper',
+            'requests'
       ],
       test_suite='test',
       tests_require=[
