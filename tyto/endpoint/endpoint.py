@@ -1,5 +1,9 @@
 from __future__ import annotations
 import abc
+import requests
+import urllib.parse
+import json
+from io import StringIO
 
 import rdflib
 from SPARQLWrapper import SPARQLWrapper, JSON
@@ -13,14 +17,6 @@ class QueryBackend(abc.ABC):
 
     @abc.abstractmethod
     def get_uri_by_term(self, ontology: Ontology, term: str):
-        return
-
-    @abc.abstractmethod
-    def query(self, ontology: Ontology, sparql: str):
-        return
-
-    @abc.abstractmethod
-    def convert(self, response):
         return
 
 
@@ -120,18 +116,27 @@ class SPARQLBuilder():
 
 
 class Endpoint(QueryBackend, abc.ABC):
-    pass
+
+    def __init__(self, url):
+        self.url = url
+
+
+class RESTEndpoint(QueryBackend, abc.ABC):
+
+    def __init__(self, url):
+        self.url = url
 
 
 class SPARQLEndpoint(SPARQLBuilder, Endpoint):
 
     def __init__(self, url):
-        self.endpoint = SPARQLWrapper(url)
-        self.endpoint.setReturnFormat(JSON)
+        super().__init__(url)
+        self._endpoint = SPARQLWrapper(url)
+        self._endpoint.setReturnFormat(JSON)
 
     def query(self, ontology, sparql, err_msg):
-        self.endpoint.setQuery(sparql)
-        response = self.endpoint.query()
+        self._endpoint.setQuery(sparql)
+        response = self._endpoint.query()
         return self.convert(response)
 
     def convert(self, response):
@@ -151,7 +156,7 @@ class SPARQLEndpoint(SPARQLBuilder, Endpoint):
         return converted_response
 
 
-class Graph(SPARQLBuilder, Endpoint):
+class GraphEndpoint(SPARQLBuilder, Endpoint):
 
     def __init__(self, file_path):
         self.graph = rdflib.Graph()
@@ -198,6 +203,59 @@ class OntobeeEndpoint(SPARQLEndpoint):
         return response
 
 
+class EBIOntologyLookupServiceAPI(RESTEndpoint):
+
+    def __init__(self):
+        super().__init__('http://www.ebi.ac.uk/ols/api')
+        self.ontology_short_ids = {}  # Set by the _load_ontology method
+
+    def _load_ontology_ids(self):
+        response = requests.get(f'{self.url}/ontologies?size=1')
+        response = response.json()
+        total_ontologies = response['page']['totalElements']
+        response = requests.get(f'{self.url}/ontologies?size={total_ontologies}')
+        response = response.json()
+        for o in response['_embedded']['ontologies']:
+            short_id = o['ontologyId']
+            iri = o['config']['id']
+            self.ontology_short_ids[iri] = short_id
+
+    def get_term_by_uri(self, ontology: Ontology, uri: str):
+        if not self.ontology_short_ids:
+            self._load_ontology_ids()
+        if ontology.uri not in self.ontology_short_ids:
+            raise LookupError(f'Ontology {ontology.uri} is not available at EBI Ontology Lookup Service')
+        short_id = self.ontology_short_ids[ontology.uri]
+        get_query = f'{self.url}/ontologies/{short_id}/terms/' + urllib.parse.quote_plus(urllib.parse.quote_plus(uri))
+        response = requests.get(get_query)
+        if response.status_code == 200:
+            return response.json()['label']
+        if response.status_code == 404:
+            return None
+        raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
+
+    def get_uri_by_term(self, ontology: Ontology, term: str):
+        if not self.ontology_short_ids:
+            self._load_ontology_ids()
+        if ontology.uri not in self.ontology_short_ids:
+            raise LookupError(f'Ontology {ontology.uri} is not available at EBI Ontology Lookup Service')
+        short_id = self.ontology_short_ids[ontology.uri]
+
+        get_query = f'{self.url}/search?q={term}&ontology={short_id}&queryFields=label'
+        response = requests.get(get_query)
+        if response.status_code == 200:
+            response = response.json()
+            if not response or not len(response['response']['docs']):
+                return None
+            return response['response']['docs'][0]['iri']
+        raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
+
+    def convert(self, response):
+        pass
+
+    def query(self, query):
+        pass
 
 
 Ontobee = OntobeeEndpoint()
+EBIOntologyLookupService = EBIOntologyLookupServiceAPI()

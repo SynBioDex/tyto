@@ -2,7 +2,7 @@ import os
 import logging
 from functools import lru_cache
 
-from .endpoint import Ontobee, Graph, Endpoint
+from .endpoint import Ontobee, EBIOntologyLookupService, GraphEndpoint, Endpoint
 
 
 LOGGER = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class Ontology():
         if path:
             if not type(path) is str:
                 raise TypeError('Invalid path specified')
-            self.graph = Graph(path)
+            self.graph = GraphEndpoint(path)
 
     def __getattr__(self, name):
         if name in self.__getattribute__('__dict__'):

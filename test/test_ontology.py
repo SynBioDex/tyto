@@ -1,5 +1,6 @@
 import unittest
 from tyto import *
+from tyto.endpoint import EBIOntologyLookupService
 
 
 class TestOntology(unittest.TestCase):
@@ -59,6 +60,32 @@ class TestOntology(unittest.TestCase):
         self.assertTrue(type(SO.promoter) is URI)
         self.assertTrue(SO.inducible_promoter.is_subclass_of(SO.promoter))
         self.assertFalse(SO.promoter.is_subclass_of(SO.inducible_promoter))
+
+
+class TestOLS(unittest.TestCase):
+
+    def test_SO(self):
+        restore_endpoints = SO.endpoints
+        restore_graph = SO.graph
+        SO.endpoints = [EBIOntologyLookupService]
+        SO.graph = None
+        uri = 'https://identifiers.org/SO:0000167'
+        self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
+        self.assertEqual(SO.promoter, uri)
+        uri = uri.replace('0000167', 'xxxxxxx')
+        with self.assertRaises(LookupError):
+            self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
+        with self.assertRaises(LookupError):
+            self.assertIsNone(SO.foo)
+        SO.endpoints = restore_endpoints
+        SO.graph = restore_graph
+
+    def test_SBO(self):
+        restore_endpoints = SBO.endpoints
+        restore_graph = SBO.graph
+        uri = 'https://identifiers.org/SBO:0000241'
+        self.assertEqual(SBO.get_term_by_uri(uri), 'functional entity')
+
 
 if __name__ == '__main__':
     unittest.main()
