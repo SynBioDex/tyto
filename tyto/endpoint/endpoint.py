@@ -1,4 +1,3 @@
-from __future__ import annotations
 import abc
 import requests
 import urllib.parse
@@ -12,11 +11,11 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 class QueryBackend(abc.ABC):
 
     @abc.abstractmethod
-    def get_term_by_uri(self, ontology: Ontology, uri: str):
+    def get_term_by_uri(self, ontology: "Ontology", uri: str):
         return
 
     @abc.abstractmethod
-    def get_uri_by_term(self, ontology: Ontology, term: str):
+    def get_uri_by_term(self, ontology: "Ontology", term: str):
         return
 
 
@@ -50,7 +49,7 @@ class SPARQLBuilder():
         response = response[0]
         return response
 
-    def get_uri_by_term(self, ontology: Ontology, term: str) -> str:
+    def get_uri_by_term(self, ontology: "Ontology", term: str) -> str:
         '''
         Get the URI assigned to an ontology term (e.g., "promoter")
         :param term: The ontology term
@@ -88,7 +87,7 @@ class SPARQLBuilder():
         response = response[0]
         return response
 
-    def is_subclass_of(self, ontology: Ontology, subclass_uri: str, superclass_uri: str) -> bool:
+    def is_subclass_of(self, ontology: "Ontology", subclass_uri: str, superclass_uri: str) -> bool:
         query = '''
             SELECT distinct ?subclass 
             {{from_clause}}
@@ -220,7 +219,7 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             iri = o['config']['id']
             self.ontology_short_ids[iri] = short_id
 
-    def get_term_by_uri(self, ontology: Ontology, uri: str):
+    def get_term_by_uri(self, ontology: "Ontology", uri: str):
         if not self.ontology_short_ids:
             self._load_ontology_ids()
         if ontology.uri not in self.ontology_short_ids:
@@ -234,7 +233,7 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             return None
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
-    def get_uri_by_term(self, ontology: Ontology, term: str):
+    def get_uri_by_term(self, ontology: "Ontology", term: str):
         if not self.ontology_short_ids:
             self._load_ontology_ids()
         if ontology.uri not in self.ontology_short_ids:
