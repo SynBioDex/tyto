@@ -11,6 +11,18 @@ logging.basicConfig(format='tyto: %(levelname)s: %(message)s')
 
 class Ontology():
 
+    """The Ontology class provides an abstraction layer for accessing ontologies, and a 
+    back-end query dispatcher for interfacing with RESTful services, SPARQL endpoints,
+    or local triple stores.
+    
+    :param path: A path to a local ontology file, defaults to None
+    :type path: str, optional
+    :param endpoints: A list of zero or more Endpoint objects that provide a query interface to an ontology resource, defaults to None
+    :type endpoints: list, optional
+    :param uri: The URI of the ontology
+    :type str
+    """
+
     def __init__(self, path=None, endpoints=None, uri=None):
         if not path and not endpoints:
             raise Exception('A sparql endpoint or a local path to an ontology must be specified')

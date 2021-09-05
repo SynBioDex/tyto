@@ -1,4 +1,4 @@
-from .owlet import Ontology, Ontobee, multi_replace
+from .tyto import Ontology, Ontobee, multi_replace
 
 
 NCIT = Ontology(path=None,
