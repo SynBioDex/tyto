@@ -1,4 +1,4 @@
-from .owlet import Ontology, Ontobee, installation_path, multi_replace
+from .tyto import Ontology, Ontobee, installation_path, multi_replace
 
 
 SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),

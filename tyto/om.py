@@ -1,4 +1,4 @@
-from .owlet import Ontology, Ontobee, installation_path
+from .tyto import Ontology, Ontobee, installation_path
 
 
 OM = Ontology(path=installation_path('ontologies/om-2.0.rdf'),
