@@ -87,19 +87,19 @@ class SPARQLBuilder():
         response = response[0]
         return response
 
-    def is_subclass_of(self, ontology: "Ontology", subclass_uri: str, superclass_uri: str) -> bool:
+    def is_child_of(self, ontology: "Ontology", child_uri: str, parent_uri: str) -> bool:
         query = '''
-            SELECT distinct ?subclass 
+            SELECT distinct ?child 
             {{from_clause}}
             WHERE 
             {{{{
-                ?subclass rdf:type owl:Class .
-                ?subclass rdfs:subClassOf <{}>
+                ?child rdf:type owl:Class .
+                ?child rdfs:subClassOf <{}>
             }}}}
-            '''.format(superclass_uri)
+            '''.format(parent_uri)
         error_msg = ''
-        subclasses = self.query(ontology, query, error_msg)
-        return subclass_uri in subclasses
+        parent_terms = self.query(ontology, query, error_msg)
+        return child_uri in parent_terms
 
     def get_ontology(self):
         query = '''

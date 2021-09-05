@@ -126,10 +126,10 @@ class URI(str):
         term.ontology = ontology
         return term
 
-    def is_subclass_of(self, superclass_uri: str):
-        subclass_uri = self.ontology._sanitize_uri(self)
-        superclass_uri = self.ontology._sanitize_uri(superclass_uri)
-        return self.ontology._handler('is_subclass_of', None, subclass_uri, superclass_uri)
+    def is_child_of(self, parent_uri: str):
+        child_uri = self.ontology._sanitize_uri(self)
+        parent_uri = self.ontology._sanitize_uri(parent_uri)
+        return self.ontology._handler('is_child_of', None, child_uri, parent_uri)
 
 
 # Utility functions

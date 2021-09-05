@@ -58,8 +58,8 @@ class TestOntology(unittest.TestCase):
 
     def test_subclass(self):
         self.assertTrue(type(SO.promoter) is URI)
-        self.assertTrue(SO.inducible_promoter.is_subclass_of(SO.promoter))
-        self.assertFalse(SO.promoter.is_subclass_of(SO.inducible_promoter))
+        self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
+        self.assertFalse(SO.promoter.is_child_of(SO.inducible_promoter))
 
 
 class TestOLS(unittest.TestCase):
