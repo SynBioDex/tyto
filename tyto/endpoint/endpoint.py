@@ -88,18 +88,32 @@ class SPARQLBuilder():
         return response
 
     def is_child_of(self, ontology: "Ontology", child_uri: str, parent_uri: str) -> bool:
-        query = '''
+        query = f'''
             SELECT distinct ?child 
             {{from_clause}}
             WHERE 
             {{{{
                 ?child rdf:type owl:Class .
-                ?child rdfs:subClassOf <{}>
+                ?child rdfs:subClassOf <{parent_uri}>
             }}}}
-            '''.format(parent_uri)
+            '''
+        error_msg = ''
+        child_terms = self.query(ontology, query, error_msg)
+        return child_uri in child_terms
+
+    def is_parent_of(self, ontology: "Ontology", parent_uri: str, child_uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?parent
+            {{from_clause}}
+            WHERE 
+            {{{{
+                <{child_uri}> rdf:type owl:Class .
+                <{child_uri}> rdfs:subClassOf ?parent
+            }}}}
+            '''
         error_msg = ''
         parent_terms = self.query(ontology, query, error_msg)
-        return child_uri in parent_terms
+        return parent_uri in parent_terms
 
     def get_ontology(self):
         query = '''
