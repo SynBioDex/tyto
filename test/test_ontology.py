@@ -68,25 +68,32 @@ class TestOntology(unittest.TestCase):
 
 class TestOLS(unittest.TestCase):
 
-    def test_SO(self):
-        restore_endpoints = SO.endpoints
-        restore_graph = SO.graph
+    restore_endpoints = SO.endpoints
+    restore_graph = SO.graph
+
+    @classmethod
+    def setUpClass(cls):
         SO.endpoints = [EBIOntologyLookupService]
         SO.graph = None
+
+    @classmethod
+    def tearDownClass(cls):
+        SO.endpoints = TestOLS.restore_endpoints
+        SO.graph = TestOLS.restore_graph
+
+    def test_SO(self):
         uri = 'https://identifiers.org/SO:0000167'
         self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         self.assertEqual(SO.promoter, uri)
+        self.assertCountEqual(EBIOntologyLookupService.get_parents(SO, SO.inducible_promoter),
+                              [SO.promoter])
         uri = uri.replace('0000167', 'xxxxxxx')
         with self.assertRaises(LookupError):
             self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         with self.assertRaises(LookupError):
             self.assertIsNone(SO.foo)
-        SO.endpoints = restore_endpoints
-        SO.graph = restore_graph
 
     def test_SBO(self):
-        restore_endpoints = SBO.endpoints
-        restore_graph = SBO.graph
         uri = 'https://identifiers.org/SBO:0000241'
         self.assertEqual(SBO.get_term_by_uri(uri), 'functional entity')
 
