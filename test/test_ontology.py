@@ -56,19 +56,38 @@ class TestOntology(unittest.TestCase):
         self.assertEqual(OM.get_term_by_uri('http://www.ontology-of-units-of-measure.org/resource/om-2/hour'),
                          'hour')
 
-    def test_subclass(self):
+    def test_child_of(self):
         self.assertTrue(type(SO.promoter) is URI)
-        self.assertTrue(SO.inducible_promoter.is_subclass_of(SO.promoter))
-        self.assertFalse(SO.promoter.is_subclass_of(SO.inducible_promoter))
+        self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
+        self.assertFalse(SO.promoter.is_child_of(SO.inducible_promoter))
+
+    def test_parent_of(self):
+        self.assertFalse(SO.inducible_promoter.is_parent_of(SO.promoter))
+        self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
 
 
 class TestOLS(unittest.TestCase):
 
-    def test_SO(self):
-        restore_endpoints = SO.endpoints
-        restore_graph = SO.graph
+    SO_endpoints = SO.endpoints
+    SO_graph = SO.graph
+    SBO_endpoints = SBO.endpoints
+    SBO_graph = SBO.graph
+
+    @classmethod
+    def setUpClass(cls):
         SO.endpoints = [EBIOntologyLookupService]
         SO.graph = None
+        SBO.endpoints = [EBIOntologyLookupService]
+        SBO.graph = None
+
+    @classmethod
+    def tearDownClass(cls):
+        SO.endpoints = TestOLS.SO_endpoints
+        SO.graph = TestOLS.SO_graph
+        SBO.endpoints = TestOLS.SBO_endpoints
+        SBO.graph = TestOLS.SBO_graph
+
+    def test_SO(self):
         uri = 'https://identifiers.org/SO:0000167'
         self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         self.assertEqual(SO.promoter, uri)
@@ -77,12 +96,19 @@ class TestOLS(unittest.TestCase):
             self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         with self.assertRaises(LookupError):
             self.assertIsNone(SO.foo)
-        SO.endpoints = restore_endpoints
-        SO.graph = restore_graph
+
+    def test_parents(self):
+        self.assertCountEqual(EBIOntologyLookupService.get_parents(SO, SO.inducible_promoter),
+                              [SO.promoter])
+        self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
+
+    def test_children(self):
+        children = EBIOntologyLookupService.get_children(SO, SO.promoter) 
+        self.assertIn(SO.inducible_promoter, children)
+        self.assertEqual(len(children), 7)
+        self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
 
     def test_SBO(self):
-        restore_endpoints = SBO.endpoints
-        restore_graph = SBO.graph
         uri = 'https://identifiers.org/SBO:0000241'
         self.assertEqual(SBO.get_term_by_uri(uri), 'functional entity')
 

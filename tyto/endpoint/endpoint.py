@@ -87,19 +87,33 @@ class SPARQLBuilder():
         response = response[0]
         return response
 
-    def is_subclass_of(self, ontology: "Ontology", subclass_uri: str, superclass_uri: str) -> bool:
-        query = '''
-            SELECT distinct ?subclass 
+    def is_child_of(self, ontology: "Ontology", child_uri: str, parent_uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?child 
             {{from_clause}}
             WHERE 
             {{{{
-                ?subclass rdf:type owl:Class .
-                ?subclass rdfs:subClassOf <{}>
+                ?child rdf:type owl:Class .
+                ?child rdfs:subClassOf <{parent_uri}>
             }}}}
-            '''.format(superclass_uri)
+            '''
         error_msg = ''
-        subclasses = self.query(ontology, query, error_msg)
-        return subclass_uri in subclasses
+        child_terms = self.query(ontology, query, error_msg)
+        return child_uri in child_terms
+
+    def is_parent_of(self, ontology: "Ontology", parent_uri: str, child_uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?parent
+            {{from_clause}}
+            WHERE 
+            {{{{
+                <{child_uri}> rdf:type owl:Class .
+                <{child_uri}> rdfs:subClassOf ?parent
+            }}}}
+            '''
+        error_msg = ''
+        parent_terms = self.query(ontology, query, error_msg)
+        return parent_uri in parent_terms
 
     def get_ontology(self):
         query = '''
@@ -124,6 +138,12 @@ class RESTEndpoint(QueryBackend, abc.ABC):
 
     def __init__(self, url):
         self.url = url
+
+    def _get_request(self, ontology: "Ontology", request: str):
+        response = requests.get(request)
+        if response.status_code == 200:
+            return response.json()
+        raise urllib.error.HTTPError(request, response.status_code, response.reason, response.headers, None)
 
 
 class SPARQLEndpoint(SPARQLBuilder, Endpoint):
@@ -219,6 +239,15 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             iri = o['config']['id']
             self.ontology_short_ids[iri] = short_id
 
+    def _get_request(self, ontology: "Ontology", get_request: str):
+        if not self.ontology_short_ids:
+            self._load_ontology_ids()
+        if ontology.uri not in self.ontology_short_ids:
+            raise LookupError(f'Ontology {ontology.uri} is not available at EBI Ontology Lookup Service')
+        short_id = self.ontology_short_ids[ontology.uri]
+        get_request = get_request.format(url=self.url, ontology=short_id)
+        return super()._get_request(ontology, get_request)
+
     def get_term_by_uri(self, ontology: "Ontology", uri: str):
         if not self.ontology_short_ids:
             self._load_ontology_ids()
@@ -248,6 +277,40 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
                 return None
             return response['response']['docs'][0]['iri']
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
+
+    def get_parents(self, ontology: "Ontology", uri: str):
+        sanitized_uri = ontology._sanitize_uri(uri)
+        encoded_uri = urllib.parse.quote_plus(urllib.parse.quote_plus(sanitized_uri)) 
+        encoded_uri = urllib.parse.quote_plus(sanitized_uri)
+
+        request = '{url}/ontologies/{ontology}/parents?id=' + encoded_uri
+        response = self._get_request(ontology, request)
+        parents = []
+        if '_embedded' in response and 'terms' in response['_embedded']:
+             parents = [term['iri'] for term in response['_embedded']['terms']]
+             parents = [ontology._reverse_sanitize_uri(iri) for iri in parents]
+        return parents
+
+    def get_children(self, ontology: "Ontology", uri: str):
+        sanitized_uri = ontology._sanitize_uri(uri)
+        encoded_uri = urllib.parse.quote_plus(urllib.parse.quote_plus(sanitized_uri)) 
+        encoded_uri = urllib.parse.quote_plus(sanitized_uri)
+
+        request = '{url}/ontologies/{ontology}/children?id=' + encoded_uri
+        response = self._get_request(ontology, request)
+        children = []
+        if '_embedded' in response and 'terms' in response['_embedded']:
+             children = [term['iri'] for term in response['_embedded']['terms']]
+             children = [ontology._reverse_sanitize_uri(iri) for iri in children]
+        return children
+
+    def is_parent_of(self, ontology: "Ontology", parent_uri: str, child_uri: str) -> bool:
+        parent_uri = ontology._reverse_sanitize_uri(parent_uri)
+        return parent_uri in self.get_parents(ontology, child_uri) 	
+
+    def is_child_of(self, ontology: "Ontology", child_uri: str, parent_uri: str) -> bool:
+        child_uri = ontology._reverse_sanitize_uri(child_uri)
+        return child_uri in self.get_children(ontology, parent_uri)
 
     def convert(self, response):
         pass
