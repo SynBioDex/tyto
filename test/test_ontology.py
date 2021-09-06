@@ -68,18 +68,24 @@ class TestOntology(unittest.TestCase):
 
 class TestOLS(unittest.TestCase):
 
-    restore_endpoints = SO.endpoints
-    restore_graph = SO.graph
+    SO_endpoints = SO.endpoints
+    SO_graph = SO.graph
+    SBO_endpoints = SBO.endpoints
+    SBO_graph = SBO.graph
 
     @classmethod
     def setUpClass(cls):
         SO.endpoints = [EBIOntologyLookupService]
         SO.graph = None
+        SBO.endpoints = [EBIOntologyLookupService]
+        SBO.graph = None
 
     @classmethod
     def tearDownClass(cls):
-        SO.endpoints = TestOLS.restore_endpoints
-        SO.graph = TestOLS.restore_graph
+        SO.endpoints = TestOLS.SO_endpoints
+        SO.graph = TestOLS.SO_graph
+        SBO.endpoints = TestOLS.SBO_endpoints
+        SBO.graph = TestOLS.SBO_graph
 
     def test_SO(self):
         uri = 'https://identifiers.org/SO:0000167'

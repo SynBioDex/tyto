@@ -3,7 +3,7 @@ from .tyto import Ontology, Ontobee, installation_path, multi_replace
 
 SBO = Ontology(path=installation_path('ontologies/SBO_OWL.owl'),
                endpoints=[Ontobee],
-               uri='http://purl.obolibrary.org/obo/sbo.owl')
+               uri='http://biomodels.net/SBO/')
 """Ontology instance for Systems Biology Ontology"""
 
 
