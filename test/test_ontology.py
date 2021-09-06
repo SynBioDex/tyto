@@ -91,13 +91,22 @@ class TestOLS(unittest.TestCase):
         uri = 'https://identifiers.org/SO:0000167'
         self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         self.assertEqual(SO.promoter, uri)
-        self.assertCountEqual(EBIOntologyLookupService.get_parents(SO, SO.inducible_promoter),
-                              [SO.promoter])
         uri = uri.replace('0000167', 'xxxxxxx')
         with self.assertRaises(LookupError):
             self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
         with self.assertRaises(LookupError):
             self.assertIsNone(SO.foo)
+
+    def test_parents(self):
+        self.assertCountEqual(EBIOntologyLookupService.get_parents(SO, SO.inducible_promoter),
+                              [SO.promoter])
+        self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
+
+    def test_children(self):
+        children = EBIOntologyLookupService.get_children(SO, SO.promoter) 
+        self.assertIn(SO.inducible_promoter, children)
+        self.assertEqual(len(children), 7)
+        self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
 
     def test_SBO(self):
         uri = 'https://identifiers.org/SBO:0000241'
