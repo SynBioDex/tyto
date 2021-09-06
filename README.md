@@ -1,3 +1,6 @@
+![gh-action badge](https://github.com/SynBioDex/tyto/workflows/CI/badge.svg)
+![readthedocs badge](https://readthedocs.org/projects/tyto/badge/)
+
 # TYTO
 **Take Your Terms from Ontologies (TYTO)** is a lightweight Python tool that makes the semantic web more user-friendly and accessible.
 
