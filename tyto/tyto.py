@@ -146,7 +146,13 @@ class URI(str):
         ancestor_uri = self.ontology._sanitize_uri(self)
         descendant_uri = self.ontology._sanitize_uri(descendant_uri)
         return self.ontology._handler('is_ancestor_of', None, ancestor_uri, descendant_uri)
-        
+
+    def is_subtype_of(self, supertype: "URI"):
+        return self.is_descendant_of(supertype)
+
+    def is_supertype_of(self, subtype: "URI"):
+        return self.is_ancestor_of(subtype)
+  
 
 # Utility functions
 def installation_path(relative_path):
