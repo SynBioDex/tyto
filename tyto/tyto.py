@@ -2,7 +2,7 @@ import os
 import logging
 from functools import lru_cache
 
-from .endpoint import Ontobee, EBIOntologyLookupService, GraphEndpoint, Endpoint
+from .endpoint import Ontobee, EBIOntologyLookupService, GraphEndpoint, QueryBackend
 
 
 LOGGER = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class Ontology():
         self.endpoints = None
         self.uri = uri
         if endpoints:
-            if not type(endpoints) is list or not all([issubclass(type(e), Endpoint) for e in endpoints]):
+            if not type(endpoints) is list or not all([issubclass(type(e), QueryBackend) for e in endpoints]):
                 raise TypeError('The endpoints argument requires a list of Endpoints')
             self.endpoints = endpoints
         if path:

@@ -60,6 +60,7 @@ class TestOntology(unittest.TestCase):
         self.assertTrue(type(SO.promoter) is URI)
         self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
         self.assertFalse(SO.promoter.is_child_of(SO.inducible_promoter))
+        self.assertTrue(NCBITaxon.Escherichia_coli.is_child_of(NCBITaxon.Escherichia))
 
     def test_parent_of(self):
         self.assertFalse(SO.inducible_promoter.is_parent_of(SO.promoter))

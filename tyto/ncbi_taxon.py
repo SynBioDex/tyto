@@ -1,7 +1,7 @@
-from .tyto import Ontology, Ontobee, installation_path, multi_replace
+from .tyto import Ontology, EBIOntologyLookupService, installation_path, multi_replace
 
 
-NCBITaxon = Ontology(endpoints=[Ontobee], uri='http://purl.obolibrary.org/obo/ncbitaxon.owl')
+NCBITaxon = Ontology(endpoints=[EBIOntologyLookupService], uri='http://purl.obolibrary.org/obo/ncbitaxon.owl')
 
 # Translate URIs to and from the identifiers.org namespace
 NCBITaxon._sanitize_uri = lambda uri: uri.replace('https://identifiers.org/taxonomy:',
