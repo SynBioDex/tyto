@@ -115,6 +115,34 @@ class SPARQLBuilder():
         parent_terms = self.query(ontology, query, error_msg)
         return parent_uri in parent_terms
 
+    def is_ancestor_of(self, ontology: "Ontology", ancestor_uri: str, descendant_uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?superclass
+            {{from_clause}}
+            WHERE 
+            {{{{
+                <{descendant_uri}> rdfs:subClassOf* ?superclass .
+                ?superclass rdf:type owl:Class .
+            }}}}
+            '''
+        error_msg = ''
+        ancestors = self.query(ontology, query, error_msg)
+        return ancestor_uri in ancestors
+
+    def is_descendant_of(self, ontology: "Ontology", descendant_uri: str, ancestor_uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?descendant
+            {{from_clause}}
+            WHERE 
+            {{{{
+                ?descendant rdf:type owl:Class .
+                ?descendant rdfs:subClassOf* <{ancestor_uri}>
+            }}}}
+            '''
+        error_msg = ''
+        descendants = self.query(ontology, query, error_msg)
+        return descendant_uri in descendants
+
     def get_ontology(self):
         query = '''
             SELECT distinct ?ontology_uri
@@ -168,8 +196,8 @@ class SPARQLEndpoint(SPARQLBuilder, Endpoint):
         converted_response = []
         if response:
             response = response.convert()  # Convert http response to JSON
-            for var, binding in zip(response['head']['vars'],
-                                    response['results']['bindings']):
+            var = response['head']['vars'][0]
+            for binding in response['results']['bindings']:
                 if var in binding:
                     converted_response.append(binding[var]['value'])
         return converted_response
@@ -304,6 +332,32 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
              children = [ontology._reverse_sanitize_uri(iri) for iri in children]
         return children
 
+    def get_descendants(self, ontology: "Ontology", uri: str):
+        sanitized_uri = ontology._sanitize_uri(uri)
+        encoded_uri = urllib.parse.quote_plus(urllib.parse.quote_plus(sanitized_uri)) 
+        encoded_uri = urllib.parse.quote_plus(sanitized_uri)
+
+        request = '{url}/ontologies/{ontology}/descendants?id=' + encoded_uri
+        response = self._get_request(ontology, request)
+        descendants = []
+        if '_embedded' in response and 'terms' in response['_embedded']:
+             descendants = [term['iri'] for term in response['_embedded']['terms']]
+             descendants = [ontology._reverse_sanitize_uri(iri) for iri in descendants]
+        return descendants
+
+    def get_ancestors(self, ontology: "Ontology", uri: str):
+        sanitized_uri = ontology._sanitize_uri(uri)
+        encoded_uri = urllib.parse.quote_plus(urllib.parse.quote_plus(sanitized_uri)) 
+        encoded_uri = urllib.parse.quote_plus(sanitized_uri)
+
+        request = '{url}/ontologies/{ontology}/ancestors?id=' + encoded_uri
+        response = self._get_request(ontology, request)
+        descendants = []
+        if '_embedded' in response and 'terms' in response['_embedded']:
+             ancestors = [term['iri'] for term in response['_embedded']['terms']]
+             ancestors = [ontology._reverse_sanitize_uri(iri) for iri in ancestors]
+        return ancestors
+
     def is_parent_of(self, ontology: "Ontology", parent_uri: str, child_uri: str) -> bool:
         parent_uri = ontology._reverse_sanitize_uri(parent_uri)
         return parent_uri in self.get_parents(ontology, child_uri) 	
@@ -311,6 +365,15 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
     def is_child_of(self, ontology: "Ontology", child_uri: str, parent_uri: str) -> bool:
         child_uri = ontology._reverse_sanitize_uri(child_uri)
         return child_uri in self.get_children(ontology, parent_uri)
+
+    def is_descendant_of(self, ontology: "Ontology", descendant_uri: str, ancestor: str) -> bool:
+        descendant_uri = ontology._reverse_sanitize_uri(descendant_uri)
+        return descendant_uri in self.get_descendants(ontology, ancestor) 	
+
+    def is_ancestor_of(self, ontology: "Ontology", ancestor_uri: str, descendant_uri: str) -> bool:
+        ancestor_uri = ontology._reverse_sanitize_uri(ancestor_uri)
+        return ancestor_uri in self.get_ancestors(ontology, descendant_uri)
+
 
     def convert(self, response):
         pass

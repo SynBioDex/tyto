@@ -68,6 +68,7 @@ class Ontology():
                         return response
                 except Exception as x:
                     LOGGER.error(x)
+                    raise
 
         # If the connection fails or nothing found, fall back and load the ontology locally
         if self.graph and not self.graph.is_loaded():
@@ -126,16 +127,26 @@ class URI(str):
         term.ontology = ontology
         return term
 
-    def is_child_of(self, parent_uri: str):
+    def is_child_of(self, parent_uri: "URI"):
         child_uri = self.ontology._sanitize_uri(self)
         parent_uri = self.ontology._sanitize_uri(parent_uri)
         return self.ontology._handler('is_child_of', None, child_uri, parent_uri)
 
-    def is_parent_of(self, child_uri: str):
-        child_uri = self.ontology._sanitize_uri(child_uri)
+    def is_parent_of(self, child_uri: "URI"):
         parent_uri = self.ontology._sanitize_uri(self)
+        child_uri = self.ontology._sanitize_uri(child_uri)
         return self.ontology._handler('is_parent_of', None, parent_uri, child_uri)
 
+    def is_descendant_of(self, ancestor_uri: "URI"):
+        descendant_uri = self.ontology._sanitize_uri(self)
+        ancestor_uri = self.ontology._sanitize_uri(ancestor_uri)
+        return self.ontology._handler('is_descendant_of', None, descendant_uri, ancestor_uri)
+
+    def is_ancestor_of(self, descendant_uri: "URI"):
+        ancestor_uri = self.ontology._sanitize_uri(self)
+        descendant_uri = self.ontology._sanitize_uri(descendant_uri)
+        return self.ontology._handler('is_ancestor_of', None, ancestor_uri, descendant_uri)
+        
 
 # Utility functions
 def installation_path(relative_path):

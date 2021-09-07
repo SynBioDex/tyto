@@ -66,6 +66,13 @@ class TestOntology(unittest.TestCase):
         self.assertFalse(SO.inducible_promoter.is_parent_of(SO.promoter))
         self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
 
+    def test_descendants(self):
+        self.assertTrue(SO.RNApol_III_promoter.is_descendant_of(SO.promoter))
+        self.assertFalse(SO.promoter.is_descendant_of(SO.RNApol_III_promoter))
+
+    def test_ancestors(self):
+        self.assertTrue(SO.promoter.is_ancestor_of(SO.RNApol_III_promoter))
+        self.assertFalse(SO.promoter.is_descendant_of(SO.RNApol_III_promoter))
 
 class TestOLS(unittest.TestCase):
 
@@ -106,8 +113,17 @@ class TestOLS(unittest.TestCase):
     def test_children(self):
         children = EBIOntologyLookupService.get_children(SO, SO.promoter) 
         self.assertIn(SO.inducible_promoter, children)
+        self.assertNotIn(SO.RNApol_III_promoter, children)  # is a descendant, not a child
         self.assertEqual(len(children), 7)
         self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
+
+    def test_descendants(self):
+        descendants = EBIOntologyLookupService.get_descendants(SO, SO.promoter) 
+        self.assertIn(SO.RNApol_III_promoter, descendants)
+
+    def test_ancestors(self):
+        ancestors = EBIOntologyLookupService.get_ancestors(NCBITaxon, NCBITaxon.Escherichia_coli)
+        self.assertIn(NCBITaxon.Bacteria, ancestors)
 
     def test_SBO(self):
         uri = 'https://identifiers.org/SBO:0000241'
