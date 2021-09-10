@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='tyto',
       version='1.0b0',
@@ -28,7 +28,7 @@ setup(name='tyto',
       ],
       # What does your project relate to?
       keywords='ontologies',
-      packages=setuptools.find_packages(),
+      packages=find_packages(),
       package_data={'tyto': ['ontologies/*.owl',
                               'ontologies/*.rdf',
                               'ontologies/*.ttl']},
