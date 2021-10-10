@@ -153,6 +153,25 @@ class URI(str):
     def is_supertype_of(self, subtype: "URI"):
         return self.is_ancestor_of(subtype)
   
+    def is_a(self, term: "URI"):
+        if term == self:
+            return True
+        if self.is_subtype_of(term):
+            return True
+        return False
+
+    def get_parents(self):
+        return self.ontology._handler('get_parents', None, self)
+
+    def get_children(self):
+        return self.ontology._handler('get_children', None, self)
+
+    def get_ancestors(self):
+        return self.ontology._handler('get_ancestors', None, self)
+
+    def get_descendants(self):
+        return self.ontology._handler('get_descendants', None, self)
+
 
 # Utility functions
 def installation_path(relative_path):
