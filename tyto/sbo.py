@@ -14,4 +14,3 @@ SBO._sanitize_uri = lambda uri: multi_replace(uri,
                                               'http://biomodels.net/SBO/SBO_')
 SBO._reverse_sanitize_uri = lambda uri: uri.replace('http://biomodels.net/SBO/SBO_',
                                                     'https://identifiers.org/SBO:')
-SBO._sanitize_term = lambda term: term.replace('_', ' ')

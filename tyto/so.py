@@ -13,3 +13,4 @@ SO._sanitize_uri = lambda uri: multi_replace(uri,
 SO._reverse_sanitize_uri = lambda uri: uri.replace('http://purl.obolibrary.org/obo/SO_',
                                                    'https://identifiers.org/SO:')
 
+SO._sanitize_term = lambda term: term
