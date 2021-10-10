@@ -9,5 +9,3 @@ NCBITaxon._sanitize_uri = lambda uri: uri.replace('https://identifiers.org/taxon
 NCBITaxon._reverse_sanitize_uri = lambda uri: uri.replace('http://purl.obolibrary.org/obo/NCBITaxon_',
                                                   'https://identifiers.org/taxonomy:')
 
-# Convert spaces in terms to underscore
-NCBITaxon._sanitize_term = lambda term: term.replace('_', ' ')

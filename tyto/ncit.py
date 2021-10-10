@@ -13,5 +13,3 @@ NCIT._sanitize_uri = lambda uri: multi_replace(uri,
 NCIT._reverse_sanitize_uri = lambda uri: uri.replace('http://purl.obolibrary.org/obo/NCIT_',
                                                      'https://identifiers.org/ncit:')
 
-# Spaces are not allowed because they render an invalid Python symbol
-NCIT._sanitize_term = lambda term: term.replace('_', ' ')
