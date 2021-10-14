@@ -30,7 +30,10 @@ Additionally ontologies have methods that allow for other types of inference.
 
 An interface for a new ontology can be configured as follows, thus allowing for dynamic lookup of terms and URIs. 
 ```
-my_ontology = Ontology(endpoint='http://myendpoint.org/sparql#', path='./ontologies/my_ontology.owl')
+>>> from tyto import EBIOntologyLookupService, Ontology
+>>> KISAO = Ontology(uri='http://www.biomodels.net/kisao/KISAO_FULL#', endpoints=[EBIOntologyLookupService])
+>>> KISAO.Gillespie_direct_algorithm
+'http://www.biomodels.net/kisao/KISAO#KISAO_0000029'
 ```
 
 ## About our mascot
