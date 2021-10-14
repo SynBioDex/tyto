@@ -4,12 +4,13 @@
 # TYTO
 **Take Your Terms from Ontologies (TYTO)** is a lightweight Python tool that makes the semantic web more user-friendly and accessible.
 
-TYTO provides a handy interface for ontologies for use in your Python application. It automatically generates symbols for URIs based on the ontology terms themselves. Currently the following ontologies are supported:
+TYTO provides a handy interface for ontologies for use in your Python application. It automatically generates symbols for URIs based on the ontology terms themselves. Currently the following ontologies are supported out-of-the-box:
 
 - Sequence Ontology (SO)
 - Systems Biology Ontology (SBO)
 - National Cancer Institute Thesaurus (NCIT)
 - Ontology of Units and Measures (OM)
+- NCBI Taxonomy (NCBITaxon)
 
 For example:
 ```
