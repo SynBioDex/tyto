@@ -119,6 +119,8 @@ class Ontology():
         # or changing camel-case to snake-case
         return term
 
+    def __getitem__(self, key):
+        return self.get_uri_by_term(key)
 
 class URI(str):
 
