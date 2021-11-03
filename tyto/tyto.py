@@ -111,7 +111,7 @@ class Ontology():
         # Some Ontology instances may override this method to perform string
         # manipulation of an ontology terms, for example, replacing spaces
         # or changing camel-case to snake-case
-        return term.replace('_', ' ')
+        return term.replace('_', r'[-_\s]')
 
     def _reverse_sanitize_term(self, term):
         # Some Ontology instances may override this method to perform string
