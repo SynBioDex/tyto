@@ -297,6 +297,7 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             raise LookupError(f'Ontology {ontology.uri} is not available at EBI Ontology Lookup Service')
         short_id = self.ontology_short_ids[ontology.uri]
 
+        term = urllib.parse.quote_plus(term)
         get_query = f'{self.url}/search?q={term}&ontology={short_id}&queryFields=label'
         response = requests.get(get_query)
         if response.status_code == 200:

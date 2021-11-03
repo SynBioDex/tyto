@@ -17,6 +17,13 @@ class TestOntology(unittest.TestCase):
         term_b = SO.get_term_by_uri('http://identifiers.org/so/SO:0000110')
         self.assertEqual(term_a, term_b)
 
+    def test_getitem(self):
+        # For terms with special characters, we must use subscripting
+        # rather than dynamic attributes for ontology terms
+        term_a = 'Escherichia coli #1/H766'
+        uri = NCBITaxon[term_a]
+        self.assertEqual(uri, 'https://identifiers.org/taxonomy:1354003')
+
     def test_SBO(self):
         uri_a = 'https://identifiers.org/SBO:0000000'
         term = SBO.get_term_by_uri(uri_a)
