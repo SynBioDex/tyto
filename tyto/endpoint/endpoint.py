@@ -63,16 +63,15 @@ class SPARQLBuilder():
         # an attribute, e.g., SBO.systems_biology_representation
         query = '''
             SELECT distinct ?uri
-            {from_clause}
+            {{from_clause}}
             WHERE
-            {{
-                {{
+            {{{{
+                {{{{
                     ?uri rdfs:label ?term
-                }}
+                }}}}
                 FILTER(REGEX(?term, '{term}', "i"))
-            }}
-            '''.replace('{term}', term)
-        print(query)
+            }}}}
+            '''.format(term=term)
         error_msg = '{} not a valid ontology term'.format(term)
         response = self.query(ontology, query, error_msg)
         if not response:
