@@ -1,4 +1,6 @@
 import unittest
+import os
+
 from tyto import *
 from tyto.endpoint import EBIOntologyLookupService
 
@@ -80,6 +82,13 @@ class TestOntology(unittest.TestCase):
     def test_ancestors(self):
         self.assertTrue(SO.promoter.is_ancestor_of(SO.RNApol_III_promoter))
         self.assertFalse(SO.promoter.is_descendant_of(SO.RNApol_III_promoter))
+
+    def test_nonunique_labels(self):
+        test_ontology = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_case_0.owl')
+        o = Ontology(path=test_ontology,
+                     uri='http://purl.obolibrary.org/obo/so.owl')
+        with self.assertRaises(LookupError):
+            uri = o.foobar
 
 class TestOLS(unittest.TestCase):
 
