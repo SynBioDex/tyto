@@ -147,15 +147,6 @@ class SPARQLBuilder():
 
     def get_ontologies(self):
         query = '''
-  PREFIX owl: <http://www.w3.org/2002/07/owl#>
-  {from_clause}
-  SELECT DISTINCT ?p, ?o
-  FROM <http://purl.obolibrary.org/obo/merged/OAE>
-  WHERE{{
-    ?s a owl:Ontology .
-	?s ?p ?o .}}
-'''
-        query = '''
             SELECT distinct ?ontology_uri ?title
             {from_clause}
             WHERE
@@ -399,6 +390,10 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
         ancestor_uri = ontology._reverse_sanitize_uri(ancestor_uri)
         return ancestor_uri in self.get_ancestors(ontology, descendant_uri)
 
+    def get_ontologies(self):
+        if not self.ontology_short_ids:
+            self._load_ontology_ids()
+        return self.ontology_short_ids
 
     def convert(self, response):
         pass
