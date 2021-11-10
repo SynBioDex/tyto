@@ -145,17 +145,36 @@ class SPARQLBuilder():
         descendants = self.query(ontology, query, error_msg)
         return descendant_uri in descendants
 
-    def get_ontology(self):
+    def get_ontologies(self):
         query = '''
-            SELECT distinct ?ontology_uri
+  PREFIX owl: <http://www.w3.org/2002/07/owl#>
+  {from_clause}
+  SELECT DISTINCT ?p, ?o
+  FROM <http://purl.obolibrary.org/obo/merged/OAE>
+  WHERE{{
+    ?s a owl:Ontology .
+	?s ?p ?o .}}
+'''
+        query = '''
+            SELECT distinct ?ontology_uri ?title
+            {from_clause}
             WHERE
-              {
-                ?ontology_uri a owl:Ontology
-              }
+              {{
+                ?ontology_uri a owl:Ontology .
+                ?ontology_uri <http://purl.org/dc/elements/1.1/title> ?title
+              }}
             '''
         error_msg = 'Graph not found'
-        response = self._query(ontology, query, error_msg)[0]
-        return response
+        response = self.query(None, query, error_msg)
+        if not response or len(response) == 0:
+            raise Exception('No ontologies found for this endpoint')
+
+        # Response is a flat list; pack into tuples of (uri, ontology name)
+        ontologies = {}
+        n_ontologies = int(len(response) / 2)
+        for uri, ontology_name in zip(response[:n_ontologies], response[n_ontologies+1:]):
+            ontologies[uri] = ontology_name
+        return ontologies
 
 
 class Endpoint(QueryBackend, abc.ABC):
@@ -199,9 +218,10 @@ class SPARQLEndpoint(SPARQLBuilder, Endpoint):
         if response:
             response = response.convert()  # Convert http response to JSON
             var = response['head']['vars'][0]
-            for binding in response['results']['bindings']:
-                if var in binding:
-                    converted_response.append(binding[var]['value'])
+            for var in response['head']['vars']:
+                for binding in response['results']['bindings']:
+                    if var in binding:
+                        converted_response.append(binding[var]['value'])
         return converted_response
 
 
@@ -239,7 +259,7 @@ class OntobeeEndpoint(SPARQLEndpoint):
         # http://purl.obolibrary.org/obo/$foo.owl (note foo must be all lowercase
         # by OBO conventions) to http://purl.obolibrary.org/obo/merged/uppercase($foo).
         from_clause = ''
-        if ontology.uri:
+        if ontology:
             ontology_uri = ontology.uri
             if 'http://purl.obolibrary.org/obo/' in ontology_uri:
                 ontology_uri = ontology_uri.replace('http://purl.obolibrary.org/obo/', '')
