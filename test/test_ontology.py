@@ -90,6 +90,14 @@ class TestOntology(unittest.TestCase):
         with self.assertRaises(LookupError):
             uri = o.foobar
 
+    def test_get_ontologies(self):
+       self.assertEqual(tyto.Ontobee.get_ontologies()\
+                        ['http://purl.obolibrary.org/obo/gno.owl'],
+                        'Echinoderm Anatomy and Development Ontology')
+       self.assertEqual(tyto.EBIOntologyLookupService.get_ontologies()
+                        ['http://purl.obolibrary.org/obo/gno.owl'],
+                        'gno')
+
 class TestOLS(unittest.TestCase):
 
     SO_endpoints = SO.endpoints
