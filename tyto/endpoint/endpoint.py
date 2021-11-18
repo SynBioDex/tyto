@@ -20,13 +20,17 @@ class QueryBackend(abc.ABC):
 
 
 class SPARQLBuilder():
+    """Mixin class that provides SPARQL queries to SPARQLEndpoint and GraphEndpoint classes
+    """
 
     def get_term_by_uri(self, ontology, uri):
-        '''
-        Get the ontology term (e.g., "promoter") corresponding to the given URI
+        """Query for a term by its URI
+
         :param uri: The URI for the term
-        :return: str
-        '''
+        :uri: URI
+        :param ontology: The Ontology to query
+        :ontology: Ontology
+        """
         query = '''
             SELECT distinct ?label
             WHERE
@@ -50,11 +54,12 @@ class SPARQLBuilder():
         return response
 
     def get_uri_by_term(self, ontology: "Ontology", term: str) -> str:
-        '''
-        Get the URI assigned to an ontology term (e.g., "promoter")
+        """Query for the URI associated with the given an ontology term (e.g., "promoter")
         :param term: The ontology term
-        :return: str
-        '''
+        :term: str
+        :param ontology: The ontology to query
+        :ontology: Ontology
+        """
 
         # Queries to the sequence ontology require the xsd:string datatype
         # whereas queries to the systems biology ontology do not, hence the
@@ -171,12 +176,22 @@ class SPARQLBuilder():
 class Endpoint(QueryBackend, abc.ABC):
 
     def __init__(self, url):
+        """
+        :param url: The URL for the endpoint
+        :url: str        
+        """
         self.url = url
 
 
 class RESTEndpoint(QueryBackend, abc.ABC):
+    """Class for issuing and handling HTTP requests
+    """
 
     def __init__(self, url):
+        """
+        :param url: The base URL for the REST endpoints
+        :url: str        
+        """
         self.url = url
 
     def _get_request(self, ontology: "Ontology", request: str):
@@ -187,21 +202,27 @@ class RESTEndpoint(QueryBackend, abc.ABC):
 
 
 class SPARQLEndpoint(SPARQLBuilder, Endpoint):
+    """Class which issues SPARQL queries to an endpoint
+    """
 
     def __init__(self, url):
+        """
+        :param url: The SPARQL endpoint
+        :url: str        
+        """
         super().__init__(url)
         self._endpoint = SPARQLWrapper(url)
         self._endpoint.setReturnFormat(JSON)
 
     def query(self, ontology, sparql, err_msg):
+        """Issues SPARQL query
+        """
         self._endpoint.setQuery(sparql)
         response = self._endpoint.query()
         return self.convert(response)
 
     def convert(self, response):
-        '''
-        Returns standard SPARQL query JSON. This extracts and flattens the queried
-        variables into a list.
+        '''Converts standard SPARQL query JSON into a flat list.
 
         See https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/
         '''
@@ -217,8 +238,11 @@ class SPARQLEndpoint(SPARQLBuilder, Endpoint):
 
 
 class GraphEndpoint(SPARQLBuilder, Endpoint):
-
+    """Class for querying a local graph from a file
+    """
     def __init__(self, file_path):
+        """
+        """
         self.graph = rdflib.Graph()
         self.path = file_path
 
@@ -234,9 +258,8 @@ class GraphEndpoint(SPARQLBuilder, Endpoint):
         return self.convert(response)
 
     def convert(self, response):
-        '''
-        Extracts and flattens queried variables from rdflib response into a list
-        '''
+        """Extracts and flattens queried variables from rdflib response into a list
+        """
         return [str(row[0]) for row in response]
 
 
@@ -403,4 +426,9 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
 
 
 Ontobee = OntobeeEndpoint()
+"""Endpoint instance representing Ontobee. Ontobee is the default linked data server for most OBO Foundry library ontologies, but is also been used for many non-OBO ontologies. 
+"""
+
 EBIOntologyLookupService = EBIOntologyLookupServiceAPI()
+"""The Ontology Lookup Service (OLS) is a repository for biomedical ontologies that aims to provide a single point of access to the latest ontology versions. Hosted by the European Bioinformatics Institute
+"""
