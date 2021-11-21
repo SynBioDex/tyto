@@ -74,6 +74,10 @@ class TestOntology(unittest.TestCase):
         self.assertTrue(SO.promoter.is_ancestor_of(SO.RNApol_III_promoter))
         self.assertFalse(SO.promoter.is_descendant_of(SO.RNApol_III_promoter))
 
+    def test_case_insensitivity(self):
+        self.assertEqual(SBO.NON_CODING_RNA, SBO.non_coding_rna)
+
+
 class TestOLS(unittest.TestCase):
 
     SO_endpoints = SO.endpoints
