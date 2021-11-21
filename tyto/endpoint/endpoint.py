@@ -76,6 +76,8 @@ class SPARQLBuilder():
         response = self.query(ontology, query, error_msg)
         if not response:
             return None
+        if len(response) > 1:
+            raise Exception('Ambiguous term--more than one matching URI found')
         response = response[0]
         return response
 
@@ -135,17 +137,27 @@ class SPARQLBuilder():
         descendants = self.query(ontology, query, error_msg)
         return descendant_uri in descendants
 
-    def get_ontology(self):
+    def get_ontologies(self):
         query = '''
-            SELECT distinct ?ontology_uri
+            SELECT distinct ?ontology_uri ?title
+            {from_clause}
             WHERE
-              {
-                ?ontology_uri a owl:Ontology
-              }
+              {{
+                ?ontology_uri a owl:Ontology .
+                ?ontology_uri <http://purl.org/dc/elements/1.1/title> ?title
+              }}
             '''
         error_msg = 'Graph not found'
-        response = self._query(ontology, query, error_msg)[0]
-        return response
+        response = self.query(None, query, error_msg)
+        if not response or len(response) == 0:
+            raise Exception('No ontologies found for this endpoint')
+
+        # Response is a flat list; pack into tuples of (uri, ontology name)
+        ontologies = {}
+        n_ontologies = int(len(response) / 2)
+        for uri, ontology_name in zip(response[:n_ontologies], response[n_ontologies+1:]):
+            ontologies[uri] = ontology_name
+        return ontologies
 
 
 class Endpoint(QueryBackend, abc.ABC):
@@ -189,9 +201,10 @@ class SPARQLEndpoint(SPARQLBuilder, Endpoint):
         if response:
             response = response.convert()  # Convert http response to JSON
             var = response['head']['vars'][0]
-            for binding in response['results']['bindings']:
-                if var in binding:
-                    converted_response.append(binding[var]['value'])
+            for var in response['head']['vars']:
+                for binding in response['results']['bindings']:
+                    if var in binding:
+                        converted_response.append(binding[var]['value'])
         return converted_response
 
 
@@ -229,7 +242,7 @@ class OntobeeEndpoint(SPARQLEndpoint):
         # http://purl.obolibrary.org/obo/$foo.owl (note foo must be all lowercase
         # by OBO conventions) to http://purl.obolibrary.org/obo/merged/uppercase($foo).
         from_clause = ''
-        if ontology.uri:
+        if ontology:
             ontology_uri = ontology.uri
             if 'http://purl.obolibrary.org/obo/' in ontology_uri:
                 ontology_uri = ontology_uri.replace('http://purl.obolibrary.org/obo/', '')
@@ -289,12 +302,15 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             raise LookupError(f'Ontology {ontology.uri} is not available at EBI Ontology Lookup Service')
         short_id = self.ontology_short_ids[ontology.uri]
 
+        term = urllib.parse.quote_plus(term)
         get_query = f'{self.url}/search?q={term}&ontology={short_id}&queryFields=label'
         response = requests.get(get_query)
         if response.status_code == 200:
             response = response.json()
             if not response or not len(response['response']['docs']):
                 return None
+            if len(response['response']['docs']) > 1 and response['response']['docs'][0]['label'] == response['response']['docs'][1]['label']:
+                raise Exception('Ambiguous term--more than one matching URI found')
             return response['response']['docs'][0]['iri']
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
@@ -366,6 +382,10 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
         ancestor_uri = ontology._reverse_sanitize_uri(ancestor_uri)
         return ancestor_uri in self.get_ancestors(ontology, descendant_uri)
 
+    def get_ontologies(self):
+        if not self.ontology_short_ids:
+            self._load_ontology_ids()
+        return self.ontology_short_ids
 
     def convert(self, response):
         pass

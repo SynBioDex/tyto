@@ -36,7 +36,8 @@ setup(name='tyto',
       install_requires=[
             'rdflib>=5.0',
             'SPARQLWrapper',
-            'requests'
+            'requests',
+            'pyparsing<3'  # See https://github.com/RDFLib/rdflib/issues/1190
       ],
       test_suite='test',
       tests_require=[

@@ -1,4 +1,6 @@
 import unittest
+import os
+
 from tyto import *
 from tyto.endpoint import EBIOntologyLookupService
 
@@ -16,6 +18,13 @@ class TestOntology(unittest.TestCase):
         # Test deprecated identifier format
         term_b = SO.get_term_by_uri('http://identifiers.org/so/SO:0000110')
         self.assertEqual(term_a, term_b)
+
+    def test_getitem(self):
+        # For terms with special characters, we must use subscripting
+        # rather than dynamic attributes for ontology terms
+        term_a = 'Escherichia coli #1/H766'
+        uri = NCBITaxon[term_a]
+        self.assertEqual(uri, 'https://identifiers.org/taxonomy:1354003')
 
     def test_SBO(self):
         uri_a = 'https://identifiers.org/SBO:0000000'
@@ -76,6 +85,21 @@ class TestOntology(unittest.TestCase):
 
     def test_case_insensitivity(self):
         self.assertEqual(SBO.NON_CODING_RNA, SBO.non_coding_rna)
+
+    def test_nonunique_labels(self):
+        test_ontology = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_case_0.owl')
+        o = Ontology(path=test_ontology,
+                     uri='http://purl.obolibrary.org/obo/so.owl')
+        with self.assertRaises(LookupError):
+            uri = o.foobar
+
+    def test_get_ontologies(self):
+       self.assertEqual(tyto.Ontobee.get_ontologies()\
+                        ['http://purl.obolibrary.org/obo/gno.owl'],
+                        'Echinoderm Anatomy and Development Ontology')
+       self.assertEqual(tyto.EBIOntologyLookupService.get_ontologies()
+                        ['http://purl.obolibrary.org/obo/gno.owl'],
+                        'gno')
 
 
 class TestOLS(unittest.TestCase):
