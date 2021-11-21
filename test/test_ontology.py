@@ -101,6 +101,9 @@ class TestOntology(unittest.TestCase):
                         ['http://purl.obolibrary.org/obo/gno.owl'],
                         'gno')
 
+    def test_relation_checks(self):
+        #Term('inducible_promoter', SO).is_a('promoter')
+        URI(SO.inducible_promoter, SO).is_a(SO.promoter)
 
 class TestOLS(unittest.TestCase):
 

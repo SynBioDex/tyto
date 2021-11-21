@@ -181,6 +181,17 @@ class URI(str):
         return self.ontology._handler('get_descendants', None, self)
 
 
+class Term(URI):
+
+    def __new__(cls, value, ontology):
+        uri = ontology.get_uri_by_term(value)
+        term = super().__new__(cls, uri, ontology)
+        term.term = value
+        return term
+
+    def __repr__(self):
+        return self.term
+
 # Utility functions
 def installation_path(relative_path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)),
