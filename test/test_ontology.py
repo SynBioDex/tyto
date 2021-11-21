@@ -83,6 +83,9 @@ class TestOntology(unittest.TestCase):
         self.assertTrue(SO.promoter.is_ancestor_of(SO.RNApol_III_promoter))
         self.assertFalse(SO.promoter.is_descendant_of(SO.RNApol_III_promoter))
 
+    def test_case_insensitivity(self):
+        self.assertEqual(SBO.NON_CODING_RNA, SBO.non_coding_rna)
+
     def test_nonunique_labels(self):
         test_ontology = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_case_0.owl')
         o = Ontology(path=test_ontology,
@@ -97,6 +100,7 @@ class TestOntology(unittest.TestCase):
        self.assertEqual(tyto.EBIOntologyLookupService.get_ontologies()
                         ['http://purl.obolibrary.org/obo/gno.owl'],
                         'gno')
+
 
 class TestOLS(unittest.TestCase):
 
