@@ -71,13 +71,13 @@ class SPARQLBuilder():
                 }}}}
                 FILTER(REGEX(?term, '{term}', "i"))
             }}}}
-            '''.format(term=term)
+            '''.format(term='^' + term.replace(' ', r'[\\-\\_\\s]') + '$')
         error_msg = '{} not a valid ontology term'.format(term)
         response = self.query(ontology, query, error_msg)
         if not response:
             return None
         if len(response) > 1:
-            raise Exception('Ambiguous term--more than one matching URI found')
+            raise Exception(f'Ambiguous term {term}--more than one matching URI found')
         response = response[0]
         return response
 
@@ -309,8 +309,8 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
             response = response.json()
             if not response or not len(response['response']['docs']):
                 return None
-            if len(response['response']['docs']) > 1 and response['response']['docs'][0]['label'] == response['response']['docs'][1]['label']:
-                raise Exception('Ambiguous term--more than one matching URI found')
+            #if len(response['response']['docs']) > 1 and response['response']['docs'][0]['label'] == response['response']['docs'][1]['label']:
+            #    raise Exception('Ambiguous term--more than one matching URI found')
             return response['response']['docs'][0]['iri']
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
