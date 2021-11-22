@@ -39,12 +39,16 @@ class Ontology():
             self.graph = GraphEndpoint(path)
 
     def __getattr__(self, name):
+        """Enables use of ontology terms as dynamic attributes, e.g., SO.promoter 
+        """
         if name in self.__getattribute__('__dict__'):
             return self.__getattribute__(name)
         else:
             return self.__getattribute__('get_uri_by_term')(name)
 
     def _handler(self, method_name, exception, *args):
+        """Dispatches queries through Endpoints
+        """
         response = None
 
         # If the ontology graph has already been loaded locally, query that rather
@@ -92,73 +96,147 @@ class Ontology():
         return None
 
     def get_term_by_uri(self, uri):
+        """Provides the ontology term (rdfs:label) associated with the given URI.
+
+        :param uri: A uniform resource identifier corresponding to an ontology term
+        :type uri: str
+
+        :return: A human-readable term or label that corresponds to the given identifier
+        :rtype: string
+    """
         sanitized_uri = self._sanitize_uri(uri)
         exception = LookupError(f'No matching term found for {uri}')
         term = self._handler('get_term_by_uri', exception, sanitized_uri)
         return self._reverse_sanitize_term(term)
 
     def get_uri_by_term(self, term):
+        """Provides the URI associated with the given ontology term (rdfs:label).  The __getattr__ and __getitem__ methods delegate to this method. 
+
+        :param term: an ontology term
+        :type term: str
+    
+        :return: A human-readable term or label that corresponds to the given identifier
+        :rtype: URI
+        """
         sanitized_term = self._sanitize_term(term)
         exception = LookupError(f'{term} is not a valid ontology term')
         uri = self._handler('get_uri_by_term', exception, sanitized_term)
         return URI(self._reverse_sanitize_uri(uri), self)
 
     def _sanitize_uri(self, uri):
-        # Some Ontology instances may override this method to translate a URI
-        # from purl to identifiers.org namespaces
+        """Some Ontology instances may override this method to translate a URI
+        from purl to identifiers.org namespaces
+        """
         return uri
 
     def _reverse_sanitize_uri(self, uri):
-        # Some Ontology instances may override this method to translate a URI
-        # from purl to identifiers.org namespaces
+        """Some Ontology instances may override this method to reverse-translate a URI
+        from identifiers.org back into purl namespace
+        """
         return uri
 
     def _sanitize_term(self, term):
-        # Some Ontology instances may override this method to perform string
-        # manipulation of an ontology terms, for example, replacing spaces
-        # or changing camel-case to snake-case
+        """Some Ontology instances may override this method in order to convert a Pythonic representation of a label into a more human-readable representation, such as replacing underscores with spaces
+        """
         return term.replace('_', ' ')
 
     def _reverse_sanitize_term(self, term):
-        # Some Ontology instances may override this method to perform string
-        # manipulation of an ontology terms, for example, replacing spaces
-        # or changing camel-case to snake-case
+        """Some Ontology instances may override this method to undo the conversion done by _sanitize_term and return a Pythonic label from free text label 
+        """
         return term
 
     def __getitem__(self, key):
+        """Enables use of an ontology term as a subscript. This method is a useful alternative to dynamic attributes in case a term contains special characters
+
+        :return: A uniform resource identifier associated with the provided term
+        :rtype: URI
+        """
         return self.get_uri_by_term(key)
 
 class URI(str):
+
+    """The URI class wraps the Python string primitive type, enabling the use of inference methods on the represented uniform resource identifier
+
+    :param value: A string value representing a uniform resource identifier
+    :type value: str
+    :param ontology: links a term to a particular Ontology instance
+    :type ontology: Ontology
+    """
 
     def __new__(cls, value: str, ontology: Ontology):
         term = str.__new__(cls, value)
         term.ontology = ontology
         return term
 
-    def is_child_of(self, parent_uri: "URI"):
+    def is_child_of(self, parent_uri: str):
+        """Determine whether this URI is an immediate subclass or subtype of the  argument URI
+    
+        :param parent_uri: URI corresponding to the putative parent term
+        :type parent_uri: str
+    
+        :rtype: bool
+        """
         child_uri = self.ontology._sanitize_uri(self)
         parent_uri = self.ontology._sanitize_uri(parent_uri)
         return self.ontology._handler('is_child_of', None, child_uri, parent_uri)
 
-    def is_parent_of(self, child_uri: "URI"):
+    def is_parent_of(self, child_uri: str):
+        """Determine whether this URI is an immediate superclass or supertype of the argument URI
+    
+        :param parent_uri: URI corresponding to the putative parent term
+        :type parent_uri: str
+    
+        :rtype: bool
+        """
         parent_uri = self.ontology._sanitize_uri(self)
         child_uri = self.ontology._sanitize_uri(child_uri)
         return self.ontology._handler('is_parent_of', None, parent_uri, child_uri)
 
-    def is_descendant_of(self, ancestor_uri: "URI"):
+    def is_descendant_of(self, ancestor_uri: str):
+        """Determine whether this URI is a taxonomic subcategory of the argument URI
+    
+        :param ancestor_uri: URI corresponding to the putative ancestor
+        :type ancestor_uri: str
+    
+        :rtype: bool
+        """
+
         descendant_uri = self.ontology._sanitize_uri(self)
         ancestor_uri = self.ontology._sanitize_uri(ancestor_uri)
         return self.ontology._handler('is_descendant_of', None, descendant_uri, ancestor_uri)
 
-    def is_ancestor_of(self, descendant_uri: "URI"):
+    def is_ancestor_of(self, descendant_uri: str):
+        """Determine whether this URI is a taxonomic superclass or supertype of the argument URI
+    
+        :param descendant_uri: URI corresponding to the putative descendant
+        :type descendant_uri: str
+    
+        :rtype: bool
+        """
+
         ancestor_uri = self.ontology._sanitize_uri(self)
         descendant_uri = self.ontology._sanitize_uri(descendant_uri)
         return self.ontology._handler('is_ancestor_of', None, ancestor_uri, descendant_uri)
 
-    def is_subtype_of(self, supertype: "URI"):
+    def is_subtype_of(self, supertype: str):
+        """Alias of is_descendant_of. Determines whether this URI is a derivative subclass or subtype of the argument URI
+    
+        :param supertype: URI corresponding to the putative supertype
+        :type supertype: str
+    
+        :rtype: bool
+        """
+
         return self.is_descendant_of(supertype)
 
-    def is_supertype_of(self, subtype: "URI"):
+    def is_supertype_of(self, subtype: str):
+        """Alias of is_ancestor_of. Determines whether this URI is a superclass or supertype of the argument URI
+    
+        :param subtype: URI corresponding to the putative subtype
+        :type subtype: str
+    
+        :rtype: bool
+        """
         return self.is_ancestor_of(subtype)
   
     def is_a(self, term: "URI"):
@@ -206,6 +284,11 @@ def multi_replace(target_uri, old_namespaces, new_namespace):
 
 
 def configure_cache_size(maxsize=1000):
+    """Set the size of the in-memory cache in order to optimize performance and frequency of queries over the network
+
+    :param maxsize: The maximum number of cached query results
+    :type maxsize: int
+    """
     if not '__wrapped__' in Ontology.get_term_by_uri.__dict__:
         # Initialize cache
         Ontology.get_term_by_uri = lru_cache(maxsize=maxsize)(Ontology.get_term_by_uri)
