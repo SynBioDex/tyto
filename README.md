@@ -31,9 +31,13 @@ Since these ontology lookup services host hundreds of ontologies, Tyto does not 
 'http://www.biomodels.net/kisao/KISAO#KISAO_0000029'
 ```
 
+### Documentation
+
+[Documentation on Readthedocs](https://tyto.readthedocs.io/en/latest/index.html)
+
 ### Inference and reasoning
 
-Additionally Tyto supports reasoning and inference over ontology terms.  For example, the following evaluates to `True` because the Sequence Ontolgoy categorizes an `inducible_promoter` as a specialized type of `promoter`. 
+Additionally Tyto supports reasoning and inference over ontology terms.  For example, the following evaluates to `True` because the Sequence Ontology categorizes an `inducible_promoter` as a specialized type of `promoter`. 
 ```
 >>> tyto.SO.inducible_promoter.is_a(tyto.SO.promoter)
 True
