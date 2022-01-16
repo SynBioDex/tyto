@@ -1,6 +1,8 @@
 ![gh-action badge](https://github.com/SynBioDex/tyto/workflows/CI/badge.svg)
 ![readthedocs badge](https://readthedocs.org/projects/tyto/badge/)
 
+![Tyto deroepstorffi](./tyto.png "Andaman masked owl")
+
 # Tyto
 **Take Your Terms from Ontologies (Tyto)** is a lightweight Python tool that makes the semantic web more user-friendly and accessible.
 
@@ -49,9 +51,7 @@ term1.get_children()
 
 ## About our mascot
 
-_Tyto deroepstorffi_, otherwise known as the Andaman masked owl, is the mascot for this repo. An owl was considered an appropriate choice because TYTO leverages the Web Ontology Language (OWL).
-
-![Tyto deroepstorffi](./tyto.png "Andaman masked owl")
+_Tyto_ is the genus of birds to which owls belong, alluding to the Web Ontology Language (OWL) in which most ontologies are encoded. Tyto's logo is derived from the ``Owl of Minerva''~\cite{owlofminerva} which is licensed under CC BY-SA 4.0.
 
 ## Acknowledgments
 
