@@ -1,0 +1,6 @@
+[submodule "tyto/ontologies/sbol-owl3"]
+	path = tyto/ontologies/sbol-owl3
+	url = https://github.com/SynBioDex/sbol-owl3.git
+[submodule "tyto/ontologies/sbol-owl"]
+	path = tyto/ontologies/sbol-owl
+	url = https://github.com/dissys/sbol-owl.git

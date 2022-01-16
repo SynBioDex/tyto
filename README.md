@@ -1,7 +1,7 @@
 ![gh-action badge](https://github.com/SynBioDex/tyto/workflows/CI/badge.svg)
 ![readthedocs badge](https://readthedocs.org/projects/tyto/badge/)
 
-![Tyto deroepstorffi](./tyto.png "Andaman masked owl")
+<img src="tyto.png" height="300" />
 
 # Tyto
 **Take Your Terms from Ontologies (Tyto)** is a lightweight Python tool that makes the semantic web more user-friendly and accessible.
@@ -33,9 +33,13 @@ Since these ontology lookup services host hundreds of ontologies, Tyto does not 
 'http://www.biomodels.net/kisao/KISAO#KISAO_0000029'
 ```
 
+### Documentation
+
+[Documentation on Readthedocs](https://tyto.readthedocs.io/en/latest/index.html)
+
 ### Inference and reasoning
 
-Additionally Tyto supports reasoning and inference over ontology terms.  For example, the following evaluates to `True` because the Sequence Ontolgoy categorizes an `inducible_promoter` as a specialized type of `promoter`. 
+Additionally Tyto supports reasoning and inference over ontology terms.  For example, the following evaluates to `True` because the Sequence Ontology categorizes an `inducible_promoter` as a specialized type of `promoter`. 
 ```
 >>> tyto.SO.inducible_promoter.is_a(tyto.SO.promoter)
 True
@@ -51,7 +55,7 @@ term1.get_children()
 
 ## About our mascot
 
-_Tyto_ is the genus of birds to which owls belong, alluding to the Web Ontology Language (OWL) in which most ontologies are encoded. Tyto's logo is derived from the ``Owl of Minerva''~\cite{owlofminerva} which is licensed under CC BY-SA 4.0.
+_Tyto_ is the genus of birds to which owls belong, alluding to the Web Ontology Language (OWL) in which most ontologies are encoded. Tyto's logo is derived from the "Owl of Minerva" which is licensed under CC BY-SA 4.0.
 
 ## Acknowledgments
 
