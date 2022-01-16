@@ -5,3 +5,5 @@ from .so import SO
 from .ncit import NCIT
 from .om import OM
 from .ncbi_taxon import NCBITaxon
+from .sbol2 import SBOL2
+from .sbol3 import SBOL3

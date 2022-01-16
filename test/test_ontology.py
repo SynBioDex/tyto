@@ -160,6 +160,18 @@ class TestOLS(unittest.TestCase):
         uri = 'https://identifiers.org/SBO:0000241'
         self.assertEqual(SBO.get_term_by_uri(uri), 'functional entity')
 
+class TestSBOL(unittest.TestCase):
+
+    def test_sbol2(self):
+        self.assertEqual(SBOL2.inline, 'http://sbols.org/v2#inline')
+        self.assertEqual(SBOL2.reverseComplement, 'http://sbols.org/v2#reverseComplement')
+        self.assertEqual(SBOL2.ComponentDefinition, 'http://sbols.org/v2#ComponentDefinition')
+
+    def test_sbol3(self):
+        self.assertEqual(SBOL3.inline, 'http://sbols.org/v3#inline')
+        self.assertEqual(SBOL3.reverseComplement, 'http://sbols.org/v3#reverseComplement')
+        self.assertEqual(SBOL3.Component, 'http://sbols.org/v3#Component')
+
 
 if __name__ == '__main__':
     unittest.main()
