@@ -7,3 +7,4 @@ from .om import OM
 from .ncbi_taxon import NCBITaxon
 from .sbol2 import SBOL2
 from .sbol3 import SBOL3
+from .edam import EDAM
