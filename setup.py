@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='tyto',
-      version='1.0b2',
+      version='1.0',
       description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
       url='https://github.com/SynBioDex/tyto',
@@ -14,7 +14,7 @@ setup(name='tyto',
             #   3 - Alpha
             #   4 - Beta
             #   5 - Production/Stable
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Production/Stable',
 
             # Indicate who your project is intended for
             'Intended Audience :: Developers',
