@@ -1,5 +1,5 @@
-![gh-action badge](https://github.com/SynBioDex/tyto/workflows/CI/badge.svg)
-![readthedocs badge](https://readthedocs.org/projects/tyto/badge/)
+[![gh-action badge](https://github.com/SynBioDex/tyto/workflows/CI/badge.svg)](https://github.com/SynBioDex/tyto/actions)
+[![readthedocs badge](https://readthedocs.org/projects/tyto/badge/)](https://tyto.readthedocs.io/en/latest/index.html)
 
 <img src="tyto.png" height="300" />
 
