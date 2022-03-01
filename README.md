@@ -59,4 +59,8 @@ _Tyto_ is the genus of birds to which owls belong, alluding to the Web Ontology 
 
 ## Acknowledgments
 
+If you make use of Tyto, please cite:
+
+>  Bryan A. Bartley, "Tyto: A Python Tool Enabling Better Annotation Practices for Synthetic Biology Data-Sharing", ACS Synthetic Biology, online February, 2022. DOI: 10.1021/acssynbio.1c00450 
+
 Development of this library has been supported by the [DARPA Synergistic Discovery and Design (SD2)](https://www.darpa.mil/program/synergistic-discovery-and-design) program and [Raytheon BBN Technologies](http://bbn.com/).
