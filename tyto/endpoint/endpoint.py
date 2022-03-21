@@ -160,8 +160,10 @@ class SPARQLBuilder():
         # Response is a flat list; pack into tuples of (uri, ontology name)
         ontologies = {}
         n_ontologies = int(len(response) / 2)
-        for uri, ontology_name in zip(response[:n_ontologies], response[n_ontologies+1:]):
+        for uri, ontology_name in zip(response[:n_ontologies], response[n_ontologies:]):
             ontologies[uri] = ontology_name
+            print(ontology_name, uri)
+        print(len(response[:n_ontologies]), len(response[n_ontologies+1:]))
         return ontologies
 
 

@@ -95,7 +95,7 @@ class TestOntology(unittest.TestCase):
 
     def test_get_ontologies(self):
        self.assertEqual(tyto.Ontobee.get_ontologies()\
-                        ['http://purl.obolibrary.org/obo/gno.owl'],
+                        ['http://purl.obolibrary.org/obo/ecao.owl'],
                         'Echinoderm Anatomy and Development Ontology')
        self.assertEqual(tyto.EBIOntologyLookupService.get_ontologies()
                         ['http://purl.obolibrary.org/obo/gno.owl'],
