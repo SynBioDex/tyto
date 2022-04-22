@@ -162,8 +162,6 @@ class SPARQLBuilder():
         n_ontologies = int(len(response) / 2)
         for uri, ontology_name in zip(response[:n_ontologies], response[n_ontologies:]):
             ontologies[uri] = ontology_name
-            print(ontology_name, uri)
-        print(len(response[:n_ontologies]), len(response[n_ontologies+1:]))
         return ontologies
 
 
@@ -418,6 +416,36 @@ class EBIOntologyLookupServiceAPI(RESTEndpoint):
     def query(self, query):
         pass
 
+class PUG_REST(RESTEndpoint):
+
+    def __init__(self):
+        super().__init__('https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance')
+
+    def get_term_by_uri(self, ontology: "Ontology", uri: str):
+        if 'https://identifiers.org/pubchem.substance:' in uri:
+            uri = uri.replace('https://identifiers.org/pubchem.substance:',
+                              'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/')
+        get_query = f'{uri}/synonyms/JSON'
+        response = requests.get(get_query)
+        if response.status_code == 200:
+            return response.json()['InformationList']['Information'][0]['Synonym'][0]
+        if response.status_code == 404:
+            return None
+        raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
+
+    def get_uri_by_term(self, ontology: "Ontology", term: str):
+        term = urllib.parse.quote(term)
+        get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/{term}/sids/JSON'
+        response = requests.get(get_query)
+        if response.status_code == 200:
+            response = response.json()
+            if not response:
+                return None
+            if len(response['IdentifierList']['SID']) > 1:
+                raise LookupError('Ambiguous term--more than one matching ID found')
+            return f"https://identifiers.org/pubchem.substance:{response['IdentifierList']['SID'][0]}"
+        raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
+
 
 Ontobee = OntobeeEndpoint()
 """Endpoint instance representing Ontobee. Ontobee is the default linked data server for most OBO Foundry library ontologies, but is also been used for many non-OBO ontologies. 
@@ -426,3 +454,5 @@ Ontobee = OntobeeEndpoint()
 EBIOntologyLookupService = EBIOntologyLookupServiceAPI()
 """The Ontology Lookup Service (OLS) is a repository for biomedical ontologies that aims to provide a single point of access to the latest ontology versions. Hosted by the European Bioinformatics Institute
 """
+
+PubChemAPI = PUG_REST()

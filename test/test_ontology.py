@@ -172,6 +172,15 @@ class TestSBOL(unittest.TestCase):
         self.assertEqual(SBOL3.reverseComplement, 'http://sbols.org/v3#reverseComplement')
         self.assertEqual(SBOL3.Component, 'http://sbols.org/v3#Component')
 
+class TestPubChem(unittest.TestCase):
+
+    def test_pubchem(self):
+        self.assertEqual(PubChem['LUDOX(R) CL-X colloidal silica, 45 wt. % suspension in H2O'], 'https://identifiers.org/pubchem.substance:24866361')
+        self.assertEqual(PubChem.get_term_by_uri('https://identifiers.org/pubchem.substance:24866361'), 'LUDOX(R) CL-X colloidal silica, 45 wt. % suspension in H2O')
+        with self.assertRaises(LookupError):
+            # Ambiguous term matches many SIDs
+            PubChem['water']
+
 
 if __name__ == '__main__':
     unittest.main()
