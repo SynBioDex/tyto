@@ -242,7 +242,10 @@ class GraphEndpoint(SPARQLBuilder, Endpoint):
         return bool(self.graph)
 
     def load(self):
-        self.graph.parse(self.path)
+        if self.path.split('.')[-1] == 'ttl':
+            self.graph.parse(self.path, format='ttl')
+        else:
+            self.graph.parse(self.path)
 
     def query(self, ontology, sparql, err_msg):
         sparql_final = sparql.format(from_clause='')  # Because only one ontology per file, delete the from clause

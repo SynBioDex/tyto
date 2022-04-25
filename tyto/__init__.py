@@ -9,3 +9,5 @@ from .sbol2 import SBOL2
 from .sbol3 import SBOL3
 from .edam import EDAM
 from .pubchem import PubChem
+from .paml import PAML
+from .uml import UML

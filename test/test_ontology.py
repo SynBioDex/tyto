@@ -181,6 +181,10 @@ class TestPubChem(unittest.TestCase):
             # Ambiguous term matches many SIDs
             PubChem['water']
 
+class TestPAML(unittest.TestCase):
+
+    def test_paml(self):
+        self.assertEqual(PAML.SampleArray, 'http://bioprotocols.org/paml#SampleArray')
 
 if __name__ == '__main__':
     unittest.main()
