@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='tyto',
-      version='1.1',
+      version='1.2',
       description='Automatically generates Python symbols for ontology terms',
       python_requires='>=3.6',
       url='https://github.com/SynBioDex/tyto',
@@ -33,7 +33,9 @@ setup(name='tyto',
                               'ontologies/*.rdf',
                               'ontologies/*.ttl',
                               'ontologies/sbol-owl3/sbolowl3.rdf',
-                              'ontologies/sbol-owl/sbol.rdf']},
+                              'ontologies/sbol-owl/sbol.rdf',
+                              'ontologies/paml/paml/paml.ttl',
+                              'ontologies/paml/uml/uml.ttl']},
       include_package_data=True,
       install_requires=[
             'rdflib>=5.0',

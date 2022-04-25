@@ -4,3 +4,6 @@
 [submodule "tyto/ontologies/sbol-owl"]
 	path = tyto/ontologies/sbol-owl
 	url = https://github.com/dissys/sbol-owl.git
+[submodule "tyto/ontologies/paml"]
+	path = tyto/ontologies/paml
+	url = git@github.com:bioprotocols/paml.git
