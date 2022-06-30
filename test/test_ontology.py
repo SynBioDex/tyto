@@ -18,6 +18,9 @@ class TestOntology(unittest.TestCase):
         # Test deprecated identifier format
         term_b = SO.get_term_by_uri('http://identifiers.org/so/SO:0000110')
         self.assertEqual(term_a, term_b)
+        # test handling of OWL anonymous node problem (https://github.com/SynBioDex/tyto/issues/65)
+        term_c = SO.deletion
+        self.assertEqual(term_c, 'https://identifiers.org/SO:0000159')
 
     def test_getitem(self):
         # For terms with special characters, we must use subscripting

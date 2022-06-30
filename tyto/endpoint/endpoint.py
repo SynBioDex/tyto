@@ -82,7 +82,25 @@ class SPARQLBuilder():
         if not response:
             return None
         if len(response) > 1:
-            raise Exception(f'Ambiguous term {term}--more than one matching URI found')
+            # If response was ambiguous, try again with a case-sensitive query instead:
+            case_sensitive_query = '''
+                SELECT distinct ?uri
+                {{from_clause}}
+                WHERE
+                {{{{
+                    {{{{
+                        ?uri rdfs:label ?term
+                    }}}}
+                    FILTER(REGEX(?term, '{term}'))
+                }}}}
+                '''.format(term='^' + term.replace(' ', r'[\\-\\_\\s]') + '$')
+            response = self.query(ontology, case_sensitive_query, error_msg)
+            if not response:
+                # if it was ambiguous before, but got nothing now, then it's the wrong case
+                return None
+            if len(response) > 1:
+                # if it's still ambiguous, then raise an exception
+                raise Exception(f'Ambiguous term {term}--found multiple URIs {response}')
         response = response[0]
         return response
 
