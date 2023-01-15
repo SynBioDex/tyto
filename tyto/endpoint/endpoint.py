@@ -182,6 +182,41 @@ class SPARQLBuilder():
             ontologies[uri] = ontology_name
         return ontologies
 
+    def is_instance(self, ontology: "Ontology", uri: str) -> bool:
+        query = f'''
+            SELECT distinct ?instance
+            {{from_clause}}
+            WHERE
+              {{{{
+                BIND(<{uri}> AS ?instance)
+                ?instance a owl:NamedIndividual .
+              }}}}
+            '''
+        error_msg = ''
+        response = self.query(None, query, error_msg)
+        if not response or len(response) == 0:
+            return False
+        else:
+            return True
+
+    def get_instances(self, ontology: "Ontology", cls: "URI") -> bool:
+        query = f'''
+            SELECT distinct ?instance
+            {{from_clause}}
+            WHERE
+              {{{{
+                ?instance a owl:NamedIndividual .
+                ?instance a <{cls}> .
+              }}}}
+            '''
+        error_msg = ''
+        instances = self.query(None, query, error_msg)
+        if not instances or len(instances) == 0:
+            raise Exception(f'{cls} has no instances')
+        else:
+            return instances
+
+
 
 class Endpoint(QueryBackend, abc.ABC):
 

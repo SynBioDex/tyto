@@ -107,7 +107,7 @@ class Ontology():
         sanitized_uri = self._sanitize_uri(uri)
         exception = LookupError(f'No matching term found for {uri}')
         term = self._handler('get_term_by_uri', exception, sanitized_uri)
-        return self._reverse_sanitize_term(term)
+        return Term(self._reverse_sanitize_term(term), self)
 
     def get_uri_by_term(self, term):
         """Provides the URI associated with the given ontology term (rdfs:label).  The __getattr__ and __getitem__ methods delegate to this method. 
@@ -246,6 +246,12 @@ class URI(str):
             return True
         return False
 
+    def is_instance(self):
+        return self.ontology._handler('is_instance', None, self)
+
+    def get_instances(self):
+        return self.ontology._handler('get_instances', None, self)
+
     def get_parents(self):
         return self.ontology._handler('get_parents', None, self)
 
@@ -269,6 +275,13 @@ class Term(URI):
 
     def __repr__(self):
         return self.term
+
+    def __str__(self):
+        return self.term
+
+    def is_instance(self):
+        return self.ontology._handler('is_instance', None, self)
+
 
 # Utility functions
 def installation_path(relative_path):
