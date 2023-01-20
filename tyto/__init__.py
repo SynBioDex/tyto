@@ -1,4 +1,4 @@
-from .tyto import Ontology, URI, configure_cache_size
+from .tyto import Ontology, URI, Term, configure_cache_size
 from .endpoint import Ontobee, EBIOntologyLookupService, PubChemAPI
 from .sbo import SBO
 from .so import SO

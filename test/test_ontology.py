@@ -108,6 +108,23 @@ class TestOntology(unittest.TestCase):
         #Term('inducible_promoter', SO).is_a('promoter')
         URI(SO.inducible_promoter, SO).is_a(SO.promoter)
 
+    def test_term_and_uri(self):
+        # Term and URI classes should behave like a primitive str
+        # but they also have extra methods for inference
+        term = SO.get_term_by_uri('https://identifiers.org/SO:0000755')
+        assert(type(term) == tyto.Term)
+        assert term == 'plasmid_vector'
+        assert(term.is_instance() is False)
+        uri = SO.get_uri_by_term(term)
+        assert(type(uri) == tyto.URI)
+        assert(uri == 'https://identifiers.org/SO:0000755')
+        assert(uri.is_instance() is False)
+
+    def test_instances(self):
+        test_ontology = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'container-ontology.ttl')
+        ContO = Ontology(path=test_ontology, uri='https://sift.net/container-ontology/container-ontology')
+        assert len(ContO['96 well plate'].get_instances()) == 2
+
 class TestOLS(unittest.TestCase):
 
     SO_endpoints = SO.endpoints
@@ -188,6 +205,7 @@ class TestPAML(unittest.TestCase):
 
     def test_paml(self):
         self.assertEqual(PAML.SampleArray, 'http://bioprotocols.org/paml#SampleArray')
+
 
 if __name__ == '__main__':
     unittest.main()
