@@ -120,6 +120,10 @@ class TestOntology(unittest.TestCase):
         assert(uri == 'https://identifiers.org/SO:0000755')
         assert(uri.is_instance() is False)
 
+    def test_instances(self):
+        test_ontology = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'container-ontology.ttl')
+        ContO = Ontology(path=test_ontology, uri='https://sift.net/container-ontology/container-ontology')
+        assert len(ContO['96 well plate'].get_instances()) == 2
 
 class TestOLS(unittest.TestCase):
 
