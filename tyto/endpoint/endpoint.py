@@ -337,7 +337,7 @@ class OntobeeEndpoint(SPARQLEndpoint):
 class EBIOntologyLookupServiceAPI(RESTEndpoint):
 
     def __init__(self):
-        super().__init__('http://www.ebi.ac.uk/ols/api')
+        super().__init__('http://www.ebi.ac.uk/ols/api/')
         self.ontology_short_ids = {}  # Set by the _load_ontology method
 
     def _load_ontology_ids(self):
@@ -490,9 +490,9 @@ class PUG_REST(RESTEndpoint):
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
     def get_uri_by_term(self, ontology: "Ontology", term: str):
-        term = urllib.parse.quote(term)
-        get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/{term}/sids/JSON'
-        response = requests.get(get_query)
+        # Relevant: https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest-tutorial#section=Special-Characters-in-the-URL
+        get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/sids/JSON'
+        response = requests.get(get_query, params={'name': term})
         if response.status_code == 200:
             response = response.json()
             if not response:
