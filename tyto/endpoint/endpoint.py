@@ -337,18 +337,18 @@ class OntobeeEndpoint(SPARQLEndpoint):
 class EBIOntologyLookupServiceAPI(RESTEndpoint):
 
     def __init__(self):
-        super().__init__('http://www.ebi.ac.uk/ols/api/')
+        super().__init__('https://www.ebi.ac.uk/ols4/api')
         self.ontology_short_ids = {}  # Set by the _load_ontology method
 
     def _load_ontology_ids(self):
-        response = requests.get(f'{self.url}/ontologies?size=1')
+        response = requests.get(f'{self.url}/v2/ontologies?size=1')
         response = response.json()
-        total_ontologies = response['page']['totalElements']
-        response = requests.get(f'{self.url}/ontologies?size={total_ontologies}')
+        total_ontologies = response['totalElements']
+        response = requests.get(f'{self.url}/v2/ontologies?size={total_ontologies}')
         response = response.json()
-        for o in response['_embedded']['ontologies']:
+        for o in response['elements']:
             short_id = o['ontologyId']
-            iri = o['config']['id']
+            iri = o['iri']
             self.ontology_short_ids[iri] = short_id
 
     def _get_request(self, ontology: "Ontology", get_request: str):
