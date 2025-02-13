@@ -22,7 +22,6 @@ class TestOntology(unittest.TestCase):
         term_c = SO.deletion
         self.assertEqual(term_c, 'https://identifiers.org/SO:0000159')
 
-    @unittest.expectedFailure
     def test_getitem(self):
         # For terms with special characters, we must use subscripting
         # rather than dynamic attributes for ontology terms
@@ -69,7 +68,6 @@ class TestOntology(unittest.TestCase):
         self.assertEqual(OM.get_term_by_uri('http://www.ontology-of-units-of-measure.org/resource/om-2/hour'),
                          'hour')
 
-    @unittest.expectedFailure
     def test_child_of(self):
         self.assertTrue(type(SO.promoter) is URI)
         self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
@@ -98,7 +96,6 @@ class TestOntology(unittest.TestCase):
         with self.assertRaises(LookupError):
             uri = o.foobar
 
-    @unittest.expectedFailure
     def test_get_ontologies(self):
        self.assertEqual(tyto.Ontobee.get_ontologies()\
                         ['http://purl.obolibrary.org/obo/ecao.owl'],
@@ -149,7 +146,6 @@ class TestOLS(unittest.TestCase):
         SBO.endpoints = TestOLS.SBO_endpoints
         SBO.graph = TestOLS.SBO_graph
 
-    @unittest.expectedFailure
     def test_SO(self):
         uri = 'https://identifiers.org/SO:0000167'
         self.assertEqual(SO.get_term_by_uri(uri), 'promoter')
@@ -160,13 +156,11 @@ class TestOLS(unittest.TestCase):
         with self.assertRaises(LookupError):
             self.assertIsNone(SO.foo)
 
-    @unittest.expectedFailure
     def test_parents(self):
         self.assertCountEqual(EBIOntologyLookupService.get_parents(SO, SO.inducible_promoter),
                               [SO.promoter])
         self.assertTrue(SO.inducible_promoter.is_child_of(SO.promoter))
 
-    @unittest.expectedFailure
     def test_children(self):
         children = EBIOntologyLookupService.get_children(SO, SO.promoter) 
         self.assertIn(SO.inducible_promoter, children)
@@ -174,17 +168,14 @@ class TestOLS(unittest.TestCase):
         self.assertEqual(len(children), 7)
         self.assertTrue(SO.promoter.is_parent_of(SO.inducible_promoter))
 
-    @unittest.expectedFailure
     def test_descendants(self):
         descendants = EBIOntologyLookupService.get_descendants(SO, SO.promoter) 
         self.assertIn(SO.RNApol_III_promoter, descendants)
 
-    @unittest.expectedFailure
     def test_ancestors(self):
         ancestors = EBIOntologyLookupService.get_ancestors(NCBITaxon, NCBITaxon.Escherichia_coli)
         self.assertIn(NCBITaxon.Bacteria, ancestors)
 
-    @unittest.expectedFailure
     def test_SBO(self):
         uri = 'https://identifiers.org/SBO:0000241'
         self.assertEqual(SBO.get_term_by_uri(uri), 'functional entity')
