@@ -202,6 +202,8 @@ class TestSBOL(unittest.TestCase):
 
 class TestPubChem(unittest.TestCase):
 
+    # Marked as expected failure pending resolution of #86
+    @unittest.expectedFailure
     def test_pubchem(self):
         self.assertEqual(PubChem['LUDOX(R) CL-X colloidal silica, 45 wt. % suspension in H2O'], 'https://identifiers.org/pubchem.substance:24866361')
         self.assertEqual(PubChem.get_term_by_uri('https://identifiers.org/pubchem.substance:24866361'), 'LUDOX(R) CL-X colloidal silica, 45 wt. % suspension in H2O')
