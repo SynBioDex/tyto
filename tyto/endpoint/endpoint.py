@@ -7,11 +7,6 @@ from io import StringIO
 import rdflib
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-import logging
-LOGGER = logging.getLogger(__name__)
-logging.basicConfig(format='[%(levelname)s] %(filename)s %(lineno)d: %(message)s')
-LOGGER.setLevel(logging.ERROR)
-
 
 class QueryBackend(abc.ABC):
 
@@ -505,7 +500,6 @@ class PUG_REST(RESTEndpoint):
             if len(response['IdentifierList']['SID']) > 1:
                 raise LookupError('Ambiguous term--more than one matching ID found')
             return f"https://identifiers.org/pubchem.substance:{response['IdentifierList']['SID'][0]}"
-        LOGGER.error(get_query)
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
 
