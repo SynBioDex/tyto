@@ -128,6 +128,14 @@ class TestOntology(unittest.TestCase):
         ContO = Ontology(path=test_ontology, uri='https://sift.net/container-ontology/container-ontology')
         assert len(ContO['96 well plate'].get_instances()) == 2
 
+    def test_fallback(self):
+        '''Test that fallback to local graph query works when query over network fails.'''
+        ontobee = SO.endpoints[0]
+        SO.endpoints = []
+        self.assertEqual(SO.sequence_feature, 'https://identifiers.org/SO:0000110')
+        SO.endpoints = [ontobee]
+
+
 class TestOLS(unittest.TestCase):
 
     SO_endpoints = SO.endpoints

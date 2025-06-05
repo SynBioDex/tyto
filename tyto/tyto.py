@@ -56,29 +56,23 @@ class Ontology():
         if self.graph and self.graph.is_loaded():
             method = getattr(self.graph, method_name)
             response = method(self, *args)
-            if response is not None:
-                return response
-            #try:
-            #    response = method(self, *args)
-            #    if response is not None:
-            #        return response
-            #except Exception as x:
-            #    LOGGER.error(x)
+            try:
+                response = method(self, *args)
+                if response is not None:
+                    return response
+            except Exception as x:
+                LOGGER.error(x)
 
         # Try endpoints
         if self.endpoints:
             for e in self.endpoints:
                 method = getattr(e, method_name)
-                response = method(self, *args)
-                if response is not None:
-                    return response
-                #try:
-                #    response = method(self, *args)
-                #    if response is not None:
-                #        return response
-                #except Exception as x:
-                #    LOGGER.error(x)
-                #    raise
+                try:
+                    response = method(self, *args)
+                    if response is not None:
+                        return response
+                except Exception as x:
+                    LOGGER.error(x)
 
         # If the connection fails or nothing found, fall back and load the ontology locally
         if self.graph and not self.graph.is_loaded():
