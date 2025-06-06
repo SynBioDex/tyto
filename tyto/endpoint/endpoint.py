@@ -487,18 +487,18 @@ class PUG_REST(RESTEndpoint):
                               'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/')
         get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/uri/synonyms/JSON'
         response = requests.get(get_query, params={'uri': uri})
+        LOGGER.error(response.request.url)
         if response.status_code == 200:
             return response.json()['InformationList']['Information'][0]['Synonym'][0]
         if response.status_code == 404:
             return None
-        print(get_query)
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
     def get_uri_by_term(self, ontology: "Ontology", term: str):
         # Relevant: https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest-tutorial#section=Special-Characters-in-the-URL
         get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/sids/JSON'
-        LOGGER.error(get_query)
         response = requests.get(get_query, params={'name': term})
+        LOGGER.error(response.request.url)
         if response.status_code == 200:
             response = response.json()
             if not response:
