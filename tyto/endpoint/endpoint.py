@@ -481,7 +481,7 @@ class PUG_REST(RESTEndpoint):
         if 'https://identifiers.org/pubchem.substance:' in uri:
             uri = uri.replace('https://identifiers.org/pubchem.substance:',
                               'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/')
-        get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/{uri}/synonyms/JSON'
+        get_query = f'{uri}/synonyms/JSON'
         response = requests.get(get_query)
         if response.status_code == 200:
             return response.json()['InformationList']['Information'][0]['Synonym'][0]
