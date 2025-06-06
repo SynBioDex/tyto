@@ -7,6 +7,10 @@ from io import StringIO
 import rdflib
 from SPARQLWrapper import SPARQLWrapper, JSON
 
+import logging
+LOGGER = logging.getLogger(__name__)
+logging.basicConfig(format='[%(levelname)s] %(filename)s %(lineno)d: %(message)s')
+
 
 class QueryBackend(abc.ABC):
 
@@ -482,17 +486,20 @@ class PUG_REST(RESTEndpoint):
             uri = uri.replace('https://identifiers.org/pubchem.substance:',
                               'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/')
         get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/sid/{uri}/synonyms/JSON'
+        LOGGER.error(get_query)
         response = requests.get(get_query)
         if response.status_code == 200:
             return response.json()['InformationList']['Information'][0]['Synonym'][0]
         if response.status_code == 404:
             return None
+        print(get_query)
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
     def get_uri_by_term(self, ontology: "Ontology", term: str):
         term = urllib.parse.quote(term)
         get_query = f'https://pubchem.ncbi.nlm.nih.gov/rest/pug/substance/name/{term}/sids/JSON'
         response = requests.get(get_query)
+        LOGGER.error(get_query)
         if response.status_code == 200:
             response = response.json()
             if not response:
@@ -500,6 +507,7 @@ class PUG_REST(RESTEndpoint):
             if len(response['IdentifierList']['SID']) > 1:
                 raise LookupError('Ambiguous term--more than one matching ID found')
             return f"https://identifiers.org/pubchem.substance:{response['IdentifierList']['SID'][0]}"
+        print(get_query)
         raise urllib.error.HTTPError(get_query, response.status_code, response.reason, response.headers, None)
 
 
